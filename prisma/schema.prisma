@@ -13,7 +13,7 @@ model Employer {
   Lname        String     @db.VarChar(45)
   Email        String     @unique(map: "Email_UNIQUE") @db.VarChar(45)
   Password     String     @db.VarChar(45)
-  Phone_number String     @db.VarChar(45)
+  Phone_number String     @unique(map: "Phone_number_UNIQUE") @db.VarChar(45)
   img          Bytes?
   country      String     @db.VarChar(45)
   city         String     @db.VarChar(45)
@@ -45,7 +45,7 @@ model Payments {
 }
 
 model Tasks {
-  id                 Int                  @unique @default(autoincrement())
+  id                 Int                  @unique(map: "id_UNIQUE") @default(autoincrement())
   Title              String               @db.VarChar(45)
   Descr              String               @db.VarChar(200)
   status             String               @db.VarChar(45)
@@ -106,13 +106,13 @@ model employee {
   Lname                 String                  @db.VarChar(45)
   Email                 String                  @unique(map: "Email_UNIQUE") @db.VarChar(45)
   Password              String                  @db.VarChar(45)
-  Phone_number          String                  @db.VarChar(45)
+  Phone_number          String                  @unique(map: "Phone_number_UNIQUE") @db.VarChar(45)
   Personal_image        String                  @db.VarChar(45)
   country               String                  @db.VarChar(45)
   city                  String                  @db.VarChar(45)
   Adress                String                  @db.VarChar(45)
   user_name             String                  @unique(map: "user_name_UNIQUE") @db.VarChar(45)
-  verified              Int
+  verified              Int                     @default(0)
   Links                 Links[]
   Tasks_has_employee    Tasks_has_employee[]
   certficates           certficates[]

@@ -1,37 +1,51 @@
 import express from 'express' ;
-import prisma  from "./db/prisma.js" ;
+import {userNameRoute} from './routes/UserName.js' ;
+import { categoriesRoute } from './routes/Categories.js';
+import { emailRoute } from './routes/Email.js';
+import { phoneRoute } from './routes/Phone.js';
+import {emailOtpRoute} from './routes/EmailOtp.js'
+import {signUpRoute} from './routes/SignUp.js'
 const app = express() ;
 
-const PORT = 8000 ;
-app.get('/' , (req,res)=>{
-    // const testo = async ()=>{
-    //     const user =  await prisma.employee.create({
-    //         data: {
-    //             National_id : 22  ,     
-    //             Fname : "Amr" ,              
-    //             Lname : "khaled" ,                 
-    //             Email : "amrk25112001@gmail.com" ,               
-    //             Password  :"1234554" ,         
-    //             Phone_number : "01220101"  ,      
-    //             Personal_image :  "sfjkkdsjsj"  ,   
-    //             country : "egyjpt" ,               
-    //             city  : "mankls" ,                 
-    //             Adress  :"masn" ,               
-    //             user_name  : "allmkkrrr" ,            
-    //             verified  : 1 ,             
-                               
-    //         },
-    //     }) 
+const PORT = process.env.PORT || 8000 ;
 
-    //     //const Printo = await prisma.Links.findMany() ;
-    //     //console.log(Printo) ;
-    // }
-    // testo() ;
+app.use(express.json()) ;
+app.use('/api/v1' , userNameRoute) ;
+app.use('/api/v1' , categoriesRoute) ;
+app.use('/api/v1' , emailRoute) ;
+app.use('/api/v1' , phoneRoute) ;
+app.use('/api/v1' , emailOtpRoute) ;
+app.use('/api/v1' , signUpRoute) ;
 
-      
-    res.send('<h1>Hello</h1>')
-})
+
 app.listen(PORT , ()=> {
-    console.log('app is listening on port ${PORT}') ;
+    console.log(`app is listening on port ${PORT}`) ;
 }
 )
+
+/***
+ * Need role in req body to check if employee or employer
+ * api/v1/ ...
+ * [ 
+ * /username -> check if username valid  (Done)
+ * /categories -> response with all categories (employee only)(Done)
+ * /email -> check if email is valid (Done)
+ * /emailOtp -> response with valid code or not !!(Done)
+ * /phone - > check if phone valid (Done)
+ * /phoneOtp -> code !! (X)
+ * /signUp -> store user data
+ * /signIn -> !!
+ * /logout -> !! 
+ * /forgetPassword -> !!
+ * /ResetPassword ->!!
+ * ]
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ */
