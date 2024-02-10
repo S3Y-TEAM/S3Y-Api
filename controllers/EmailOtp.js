@@ -1,34 +1,50 @@
 import prisma from "../db/prisma.js";
 import nodemailer from 'nodemailer'
+import { isTokenValid } from "../utils/jwt.js";
+import { attachCookiesToResponse } from "../utils/jwt.js";
 const emailOtpController = async(req,res)=>{
-    const {email} = req.body ;
-    let codeNumber = generateCode();
 
-    const transporter = nodemailer.createTransport({
-        service: "Gmail",
-        host: "smtp.gmail.com",
-        port: 465,
-        secure: true,
-        auth: {
-          user: "amrk25112001@gmail.com",
-          pass: process.env.App_Password
-        },
-      });
-      
-      const mailOptions = {
-        from: "S3Y-Team",
-        to: `${email}`,
-        subject: "Email Verification",
-        text: `Your Code is : ${codeNumber} \n Don't Share it with anyone  `,
-      };
-      transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          console.error("Error sending email: ", error);
-        } else {
-          console.log("Email sent: ", info.response);
+    const token = req.signedCookies.token;
+    const decodedToken = isTokenValid({ token });
+    if(decodedToken.email===req.body.email){
+      const {email} = req.body ;
+      let codeNumber = generateCode();
+
+      const transporter = nodemailer.createTransport({
+          service: "Gmail",
+          host: "smtp.gmail.com",
+          port: 465,
+          secure: true,
+          auth: {
+            user: "amrk25112001@gmail.com",
+            pass: process.env.App_Password
+          },
+        });
+        
+        const mailOptions = {
+          from: "S3Y-Team",
+          to: `${email}`,
+          subject: "Email Verification",
+          text: `Your Code is : ${codeNumber} \n Don't Share it with anyone  `,
+        };
+        transporter.sendMail(mailOptions, (error, info) => {
+          if (error) {
+            console.error("Error sending email: ", error);
+          } else {
+            console.log("Email sent: ", info.response);
+          }
+        });
+
+        const payload = {
+          email :  email , 
+          code : codeNumber
         }
-      });
-      res.status(201).json({codeNumber : codeNumber }) ;
+        const token =  attachCookiesToResponse(res,payload) ;
+
+        res.status(200).json({codeNumber : codeNumber }) ;
+    }else {
+      res.status(400).json({error : "You are not allowed to access this page"})
+    }
 }
 
 const generateCode = ()=>{

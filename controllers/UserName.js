@@ -1,4 +1,5 @@
 import  prisma  from "../db/prisma.js";
+import { attachCookiesToResponse } from "../utils/jwt.js";
 const userNameController = async(req,res)=>{
     const {role , userName} = req.body ;
     if(role === "employee" || role === "Employer"){
@@ -8,13 +9,19 @@ const userNameController = async(req,res)=>{
                 valid : 0 ,
             })
         }else {
+            const payload = {
+                userName : userName 
+            }
+            const token =  attachCookiesToResponse(res,payload) ;
             res.status(201).json({
                 valid :1 ,
             })
         }
     }
     else {
-        throw new Error('Enter Valid role !!!!!!') ;
+        res.status(404).json({
+            error : "enter valid role !!" 
+        })
     }
 }
 
