@@ -4,7 +4,7 @@ import { attachCookiesToResponse } from "../utils/jwt.js";
 const emailController = async(req,res)=>{
     const token = req.signedCookies.token;
     const decodedToken = isTokenValid({ token });
-    if(decodedToken.userName === req.body.userName){
+    if(decodedToken.userName === req.body.userName && req.body.role===decodedToken.role){
         const {role , email} = req.body ;
         if(role === "employee" || role === "Employer"){
             const emailExist = await checkEmailExistance(role , email) ;
@@ -15,7 +15,8 @@ const emailController = async(req,res)=>{
                 })
             }else {
                 const payload = {
-                    email :  email
+                    email :  email ,
+                    role
                 }
                 const token =  attachCookiesToResponse(res,payload) ;
                 

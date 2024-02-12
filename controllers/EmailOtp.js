@@ -6,8 +6,8 @@ const emailOtpController = async(req,res)=>{
 
     const token = req.signedCookies.token;
     const decodedToken = isTokenValid({ token });
-    if(decodedToken.email===req.body.email){
-      const {email} = req.body ;
+    if(decodedToken.email===req.body.email && req.body.role===decodedToken.role){
+      const {email,role} = req.body ;
       let codeNumber = generateCode();
 
       const transporter = nodemailer.createTransport({
@@ -37,7 +37,8 @@ const emailOtpController = async(req,res)=>{
 
         const payload = {
           email :  email , 
-          code : codeNumber
+          code : codeNumber ,
+          role
         }
         const token =  attachCookiesToResponse(res,payload) ;
 

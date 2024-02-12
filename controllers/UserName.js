@@ -10,7 +10,8 @@ const userNameController = async(req,res)=>{
             })
         }else {
             const payload = {
-                userName : userName 
+                userName : userName , 
+                role
             }
             const token =  attachCookiesToResponse(res,payload) ;
             res.status(201).json({

@@ -7,7 +7,7 @@ const phoneController = async(req,res)=>{
         const token = req.signedCookies.token;
         const decodedToken = isTokenValid({ token });
         
-        if((role === "employee" || role === "Employer")&& decodedToken.code===req.body.codeNumber){
+        if((role === "employee" || role === "Employer")&& decodedToken.code===req.body.codeNumber && decodedToken.role===req.body.role){
             const phoneExist = await checkPhoneExistance(role , phone) ;
             if(phoneExist){
                 res.status(400).json({
@@ -17,7 +17,8 @@ const phoneController = async(req,res)=>{
                 const payload = {
                     email :  decodedToken.email , 
                     code : req.body.codeNumber , 
-                    phone 
+                    phone  ,
+                    role
                 }
                 const token =  attachCookiesToResponse(res,payload) ;
                 res.status(201).json({
