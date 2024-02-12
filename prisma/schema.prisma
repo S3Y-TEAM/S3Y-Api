@@ -12,9 +12,9 @@ model Employer {
   Fname        String     @db.VarChar(45)
   Lname        String     @db.VarChar(45)
   Email        String     @unique(map: "Email_UNIQUE") @db.VarChar(45)
-  Password     String     @db.VarChar(45)
+  Password     String     @db.VarChar(200)
   Phone_number String     @db.VarChar(45)
-  img          Bytes?
+  img          String
   country      String     @db.VarChar(45)
   city         String     @db.VarChar(45)
   Address      String     @db.VarChar(60)
@@ -84,10 +84,10 @@ model Tasks_has_employee {
 }
 
 model category {
-  name                  String                 @db.VarChar(20)
-  id                    Int                    @id @unique(map: "id_UNIQUE") @default(autoincrement())
-  Tasks                 Tasks[]
+  name                  String                @db.VarChar(20)
+  id                    Int                   @id @unique(map: "id_UNIQUE") @default(autoincrement())
   employee_has_category EmployeeHasCategory[]
+  Tasks                 Tasks[]
 }
 
 model certficates {
@@ -101,30 +101,30 @@ model certficates {
 }
 
 model employee {
-  id                    Int                    @id @unique(map: "id_UNIQUE") @default(autoincrement())
-  National_id           String                 @unique(map: "National_id_UNIQUE") @db.VarChar(45)
-  Fname                 String                 @db.VarChar(45)
-  Lname                 String                 @db.VarChar(45)
-  Email                 String                 @unique(map: "Email_UNIQUE") @db.VarChar(45)
-  Password              String                 @db.VarChar(45)
-  Phone_number          String                 @db.VarChar(45)
-  Personal_image        String                 @db.VarChar(45)
-  country               String                 @db.VarChar(45)
-  city                  String                 @db.VarChar(45)
-  Adress                String                 @db.VarChar(45)
-  user_name             String                 @unique(map: "user_name_UNIQUE") @db.VarChar(45)
+  id                    Int                   @id @unique(map: "id_UNIQUE") @default(autoincrement())
+  National_id           String                @unique(map: "National_id_UNIQUE") @db.VarChar(45)
+  Fname                 String                @db.VarChar(45)
+  Lname                 String                @db.VarChar(45)
+  Email                 String                @unique(map: "Email_UNIQUE") @db.VarChar(45)
+  Password              String                @db.VarChar(200)
+  Phone_number          String                @db.VarChar(45)
+  Personal_image        String                @db.VarChar(45)
+  country               String                @db.VarChar(45)
+  city                  String                @db.VarChar(45)
+  Address               String                @db.VarChar(45)
+  user_name             String                @unique(map: "user_name_UNIQUE") @db.VarChar(45)
   verified              Int
+  employee_has_category EmployeeHasCategory[]
   Links                 Links[]
   Tasks_has_employee    Tasks_has_employee?
   certficates           certficates[]
-  employee_has_category EmployeeHasCategory[]
   messages              messages[]
   problems              problems[]
 }
 
 model EmployeeHasCategory {
-  employee_id Int      
-  category_id Int      
+  employee_id Int
+  category_id Int
   category    category @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_employee_has_category_category1")
   employee    employee @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_employee_has_category_employee1")
 

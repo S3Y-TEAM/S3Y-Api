@@ -6,7 +6,7 @@ const emailOtpController = async(req,res)=>{
 
     const token = req.signedCookies.token;
     const decodedToken = isTokenValid({ token });
-    if(decodedToken.email===req.body.email && req.body.role===decodedToken.role){
+    if(decodedToken.email===req.body.email && req.body.role===decodedToken.role && decodedToken.userName===req.body.userName){
       const {email,role} = req.body ;
       let codeNumber = generateCode();
 
@@ -38,7 +38,8 @@ const emailOtpController = async(req,res)=>{
         const payload = {
           email :  email , 
           code : codeNumber ,
-          role
+          role ,
+          userName : decodedToken.userName
         }
         const token =  attachCookiesToResponse(res,payload) ;
 

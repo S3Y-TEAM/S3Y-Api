@@ -16,7 +16,8 @@ const emailController = async(req,res)=>{
             }else {
                 const payload = {
                     email :  email ,
-                    role
+                    role , 
+                    userName : decodedToken.userName
                 }
                 const token =  attachCookiesToResponse(res,payload) ;
                 
