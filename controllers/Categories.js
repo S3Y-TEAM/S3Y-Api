@@ -5,8 +5,17 @@ const categoriesController = async(req,res)=>{
     const decodedToken = isTokenValid({ token });
     
     if(req.body.role==="employee" && (decodedToken.userName === req.body.userName)){
-    const categories = await prisma.category.findMany() ;
-    res.status(200).json(categories) ;
+        const categoriesList = [] ;
+        for(const cat of req.body.name){
+            const categories = await prisma.category.create({
+                data : {
+                    name : cat 
+                } 
+            })
+            categoriesList.push(categories) ;
+        }
+        
+        res.status(200).json(categoriesList) ;
     }else {
         res.status(400).json({
             error : "You are not allowed to access this page"

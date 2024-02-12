@@ -8,12 +8,12 @@ datasource db {
 }
 
 model Employer {
-  emp_id       Int        @id @default(autoincrement())
+  emp_id       Int        @id @unique(map: "emp_id_UNIQUE") @default(autoincrement())
   Fname        String     @db.VarChar(45)
   Lname        String     @db.VarChar(45)
   Email        String     @unique(map: "Email_UNIQUE") @db.VarChar(45)
   Password     String     @db.VarChar(45)
-  Phone_number String     @unique(map: "Phone_number_UNIQUE") @db.VarChar(45)
+  Phone_number String     @db.VarChar(45)
   img          Bytes?
   country      String     @db.VarChar(45)
   city         String     @db.VarChar(45)
@@ -25,19 +25,19 @@ model Employer {
 }
 
 model Links {
-  id                   Int      @default(autoincrement())
-  Linkedin             String?  @db.VarChar(45)
-  Github               String?  @db.VarChar(45)
-  other                String?  @db.VarChar(45)
-  employee_National_id Int
-  employee             employee @relation(fields: [employee_National_id], references: [National_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Links_employee1")
+  id          Int      @unique(map: "id_UNIQUE") @default(autoincrement())
+  Linkedin    String?  @db.VarChar(45)
+  Github      String?  @db.VarChar(45)
+  other       String?  @db.VarChar(45)
+  employee_id Int
+  employee    employee @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Links_employee1")
 
-  @@id([id, employee_National_id])
-  @@index([employee_National_id], map: "fk_Links_employee1_idx")
+  @@id([id, employee_id])
+  @@index([employee_id], map: "fk_Links_employee1_idx")
 }
 
 model Payments {
-  id           String   @id @db.VarChar(45)
+  id           Int      @id @unique(map: "id_UNIQUE") @default(autoincrement())
   status       Int
   Total_amount Int
   date         DateTime @db.DateTime(0)
@@ -45,25 +45,25 @@ model Payments {
 }
 
 model Tasks {
-  id                 Int                  @unique(map: "id_UNIQUE") @default(autoincrement())
-  Title              String               @db.VarChar(45)
-  Descr              String               @db.VarChar(200)
-  status             String               @db.VarChar(45)
-  posting_date       DateTime             @db.DateTime(0)
-  deadline           DateTime             @db.Date
-  Address            String               @db.VarChar(45)
-  price              Decimal?             @db.Decimal(10, 0)
+  id                 Int                 @unique(map: "id_UNIQUE") @default(autoincrement())
+  Title              String              @db.VarChar(45)
+  Descr              String              @db.VarChar(200)
+  status             String              @db.VarChar(45)
+  posting_date       DateTime            @db.DateTime(0)
+  deadline           DateTime            @db.DateTime(0)
+  Address            String              @db.VarChar(45)
+  price              Decimal?            @db.Decimal(10, 0)
   img                Bytes?
-  note               String?              @db.VarChar(100)
+  note               String?             @db.VarChar(100)
   Employer_emp_id    Int
-  category_id        String               @db.VarChar(45)
-  Payments_id        String               @db.VarChar(45)
+  category_id        Int
+  Payments_id        Int
   reviews_id         Int
-  Employer           Employer             @relation(fields: [Employer_emp_id], references: [emp_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Tasks_Employer1")
-  Payments           Payments             @relation(fields: [Payments_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Tasks_Payments1")
-  category           category             @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Tasks_category1")
-  reviews            reviews              @relation(fields: [reviews_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Tasks_reviews1")
-  Tasks_has_employee Tasks_has_employee[]
+  Employer           Employer            @relation(fields: [Employer_emp_id], references: [emp_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Tasks_Employer1")
+  Payments           Payments            @relation(fields: [Payments_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Tasks_Payments1")
+  category           category            @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Tasks_category1")
+  reviews            reviews             @relation(fields: [reviews_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Tasks_reviews1")
+  Tasks_has_employee Tasks_has_employee?
 
   @@id([id, Employer_emp_id, category_id, Payments_id, reviews_id])
   @@index([Employer_emp_id], map: "fk_Tasks_Employer1_idx")
@@ -73,96 +73,97 @@ model Tasks {
 }
 
 model Tasks_has_employee {
-  Tasks_id             Int
-  employee_National_id Int
-  Tasks                Tasks    @relation(fields: [Tasks_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Tasks_has_employee_Tasks")
-  employee             employee @relation(fields: [employee_National_id], references: [National_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Tasks_has_employee_employee1")
+  Tasks_id    Int      @unique(map: "Tasks_id_UNIQUE")
+  employee_id Int      @unique(map: "employee_id_UNIQUE")
+  Tasks       Tasks    @relation(fields: [Tasks_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Tasks_has_employee_Tasks")
+  employee    employee @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Tasks_has_employee_employee1")
 
-  @@id([Tasks_id, employee_National_id])
+  @@id([Tasks_id, employee_id])
   @@index([Tasks_id], map: "fk_Tasks_has_employee_Tasks_idx")
-  @@index([employee_National_id], map: "fk_Tasks_has_employee_employee1_idx")
+  @@index([employee_id], map: "fk_Tasks_has_employee_employee1_idx")
 }
 
 model category {
-  name                  String                  @db.VarChar(20)
-  id                    String                  @id @db.VarChar(45)
+  name                  String                 @db.VarChar(20)
+  id                    Int                    @id @unique(map: "id_UNIQUE") @default(autoincrement())
   Tasks                 Tasks[]
-  employee_has_category employee_has_category[]
+  employee_has_category EmployeeHasCategory[]
 }
 
 model certficates {
-  id                   Int      @default(autoincrement())
-  name                 String   @db.VarChar(45)
-  employee_National_id Int
-  employee             employee @relation(fields: [employee_National_id], references: [National_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_certficates_employee1")
+  id          Int      @unique(map: "id_UNIQUE") @default(autoincrement())
+  name        String   @db.VarChar(45)
+  employee_id Int
+  employee    employee @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_certficates_employee1")
 
-  @@id([id, employee_National_id])
-  @@index([employee_National_id], map: "fk_certficates_employee1_idx")
+  @@id([id, employee_id])
+  @@index([employee_id], map: "fk_certficates_employee1_idx")
 }
 
 model employee {
-  National_id           Int                     @id @unique(map: "National_id_UNIQUE")
-  Fname                 String                  @db.VarChar(45)
-  Lname                 String                  @db.VarChar(45)
-  Email                 String                  @unique(map: "Email_UNIQUE") @db.VarChar(45)
-  Password              String                  @db.VarChar(45)
-  Phone_number          String                  @unique(map: "Phone_number_UNIQUE") @db.VarChar(45)
-  Personal_image        String                  @db.VarChar(45)
-  country               String                  @db.VarChar(45)
-  city                  String                  @db.VarChar(45)
-  Adress                String                  @db.VarChar(45)
-  user_name             String                  @unique(map: "user_name_UNIQUE") @db.VarChar(45)
-  verified              Int                     @default(0)
+  id                    Int                    @id @unique(map: "id_UNIQUE") @default(autoincrement())
+  National_id           String                 @unique(map: "National_id_UNIQUE") @db.VarChar(45)
+  Fname                 String                 @db.VarChar(45)
+  Lname                 String                 @db.VarChar(45)
+  Email                 String                 @unique(map: "Email_UNIQUE") @db.VarChar(45)
+  Password              String                 @db.VarChar(45)
+  Phone_number          String                 @db.VarChar(45)
+  Personal_image        String                 @db.VarChar(45)
+  country               String                 @db.VarChar(45)
+  city                  String                 @db.VarChar(45)
+  Adress                String                 @db.VarChar(45)
+  user_name             String                 @unique(map: "user_name_UNIQUE") @db.VarChar(45)
+  verified              Int
   Links                 Links[]
-  Tasks_has_employee    Tasks_has_employee[]
+  Tasks_has_employee    Tasks_has_employee?
   certficates           certficates[]
-  employee_has_category employee_has_category[]
+  employee_has_category EmployeeHasCategory[]
   messages              messages[]
   problems              problems[]
 }
 
-model employee_has_category {
-  employee_National_id Int
-  category_id          String   @db.VarChar(45)
-  category             category @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_employee_has_category_category1")
-  employee             employee @relation(fields: [employee_National_id], references: [National_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_employee_has_category_employee1")
+model EmployeeHasCategory {
+  employee_id Int      @unique(map: "employee_id_UNIQUE")
+  category_id Int      @unique(map: "category_id_UNIQUE")
+  category    category @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_employee_has_category_category1")
+  employee    employee @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_employee_has_category_employee1")
 
-  @@id([employee_National_id, category_id])
+  @@id([employee_id, category_id])
   @@index([category_id], map: "fk_employee_has_category_category1_idx")
-  @@index([employee_National_id], map: "fk_employee_has_category_employee1_idx")
+  @@index([employee_id], map: "fk_employee_has_category_employee1_idx")
 }
 
 model messages {
-  id                   Int
-  text                 String   @db.VarChar(1000)
-  img                  Bytes?
-  Date                 DateTime @db.DateTime(0)
-  employee_National_id Int
-  Employer_emp_id      Int
-  Employer             Employer @relation(fields: [Employer_emp_id], references: [emp_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_messages_Employer1")
-  employee             employee @relation(fields: [employee_National_id], references: [National_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_messages_employee1")
+  id              Int      @unique(map: "id_UNIQUE")
+  text            String   @db.VarChar(1000)
+  img             Bytes?
+  Date            DateTime @db.DateTime(0)
+  employee_id     Int
+  Employer_emp_id Int
+  Employer        Employer @relation(fields: [Employer_emp_id], references: [emp_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_messages_Employer1")
+  employee        employee @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_messages_employee1")
 
-  @@id([id, employee_National_id, Employer_emp_id])
+  @@id([id, employee_id, Employer_emp_id])
   @@index([Employer_emp_id], map: "fk_messages_Employer1_idx")
-  @@index([employee_National_id], map: "fk_messages_employee1_idx")
+  @@index([employee_id], map: "fk_messages_employee1_idx")
 }
 
 model problems {
-  id                   Int
-  text                 String   @db.VarChar(45)
-  img                  Bytes
-  Employer_emp_id      Int
-  employee_National_id Int
-  Employer             Employer @relation(fields: [Employer_emp_id], references: [emp_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_problems_Employer1")
-  employee             employee @relation(fields: [employee_National_id], references: [National_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_problems_employee1")
+  id              Int      @unique(map: "id_UNIQUE")
+  text            String   @db.VarChar(45)
+  img             Bytes
+  Employer_emp_id Int
+  employee_id     Int
+  Employer        Employer @relation(fields: [Employer_emp_id], references: [emp_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_problems_Employer1")
+  employee        employee @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_problems_employee1")
 
-  @@id([id, Employer_emp_id, employee_National_id])
+  @@id([id, Employer_emp_id, employee_id])
   @@index([Employer_emp_id], map: "fk_problems_Employer1_idx")
-  @@index([employee_National_id], map: "fk_problems_employee1_idx")
+  @@index([employee_id], map: "fk_problems_employee1_idx")
 }
 
 model reviews {
-  id     Int     @id
+  id     Int     @id @unique(map: "id_UNIQUE") @default(autoincrement())
   text   String  @db.VarChar(200)
   img    Bytes?
   rating Decimal @db.Decimal(10, 0)
