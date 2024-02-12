@@ -123,8 +123,8 @@ model employee {
 }
 
 model EmployeeHasCategory {
-  employee_id Int      @unique(map: "employee_id_UNIQUE")
-  category_id Int      @unique(map: "category_id_UNIQUE")
+  employee_id Int      
+  category_id Int      
   category    category @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_employee_has_category_category1")
   employee    employee @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_employee_has_category_employee1")
 

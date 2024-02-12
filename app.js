@@ -35,7 +35,7 @@ app.listen(PORT , ()=> {
  * /emailOtp -> response with valid code or not !!(Done)
  * /phone - > check if phone valid (Done)
  * /phoneOtp -> code !! (X)
- * /signUp -> store user data
+ * /signUp -> store user data(Done)
  * /signIn -> !!
  * /logout -> !! 
  * /forgetPassword -> !!

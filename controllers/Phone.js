@@ -1,20 +1,35 @@
 import  prisma  from "../db/prisma.js";
+import { isTokenValid } from "../utils/jwt.js";
+import { attachCookiesToResponse } from "../utils/jwt.js";
 const phoneController = async(req,res)=>{
-    const {role , phone} = req.body ;
-    if(role === "employee" || role === "Employer"){
-        const phoneExist = await checkPhoneExistance(role , phone) ;
-        if(phoneExist){
-            res.status(201).json({
-                valid : 0 ,
-            })
-        }else {
-            res.status(201).json({
-                valid :1 ,
-            })
+    try{
+        const {role , phone } = req.body ;
+        const token = req.signedCookies.token;
+        const decodedToken = isTokenValid({ token });
+        
+        if((role === "employee" || role === "Employer")&& decodedToken.code===req.body.codeNumber){
+            const phoneExist = await checkPhoneExistance(role , phone) ;
+            if(phoneExist){
+                res.status(400).json({
+                    error : "this phone already exist"
+                })
+            }else {
+                const payload = {
+                    email :  decodedToken.email , 
+                    code : req.body.codeNumber , 
+                    phone 
+                }
+                const token =  attachCookiesToResponse(res,payload) ;
+                res.status(201).json({
+                phone   
+                })
+            }
         }
-    }
-    else {
-        throw new Error('Enter Valid role !!!!!!') ;
+        else {
+            throw new Error("unAuthorized to access this route .. ") ;
+        }
+    }catch(e){
+        res.status(400).json({error : e.message}) ;
     }
 }
 

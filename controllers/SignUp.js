@@ -1,12 +1,43 @@
 import prisma from '../db/prisma.js' ;
 import { checkEmailExistance } from './Email.js';
 import {checkUserNameExistance} from './UserName.js'
+import bcrypt from "bcrypt" ;
+import { isTokenValid } from "../utils/jwt.js";
+import { attachCookiesToResponse } from "../utils/jwt.js";
 const signUpController = async(req,res)=>{
+    try{
+        //authorization 
+        const token = req.signedCookies.token;
+        const decodedToken = isTokenValid({ token });
+        
+        if((decodedToken.phone === req.body.Phone_number)||(decodedToken.email===req.body.Email)){
+        //const {email , role , userName} = req.body ;
+        const values = req.body ;
+        const workFactor = 10;
+        let password = req.body.Password;
+        
+        // hashing password 
+        bcrypt
+        .genSalt(workFactor)
+        .then(salt => {
+            return bcrypt.hash(password, salt);
+        })
+        .then(hash => {
+            password = hash ;
+        })
+        .catch(err => console.error(err.message));
 
-    //const {email , role , userName} = req.body ;
-    const values = req.body ;
-    const user = await insertValues(values) ;
-    res.status(201).json(user) ;
+        req.body.Password = password ;
+
+        // create user
+        const user = await insertValues(values) ;
+        res.status(201).json(user) ;
+        }else {
+            res.status(400).json({error:  "unAuthorized to access this route !"})
+        }
+    }catch(e){
+        res.status(400).json({error : e.message}) ;
+    }
 }
 
 const insertValues = async(values)=>{
@@ -35,17 +66,14 @@ const insertValues = async(values)=>{
                     employee_has_category : {
                         create : values.categories
                     }
-
-                    
-                    
                 }
             })
-            //console.log(user) ;
+            
             return user ;
 
 
         }catch(e){
-            return {error : "Already Regisered .."}
+            throw new Error("Already Registered ..")
         }
     }
 }
