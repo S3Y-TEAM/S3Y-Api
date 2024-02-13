@@ -35,29 +35,3 @@ app.listen(PORT , ()=> {
 }
 )
 
-/***
- * Need role in req body to check if employee or employer
- * api/v1/ ...
- * [ 
- * /username -> check if username valid  (Done)
- * /categories -> response with all categories (employee only)(Done)
- * /email -> check if email is valid (Done)
- * /emailOtp -> response with valid code or not !!(Done)
- * /phone - > check if phone valid (Done)
- * /phoneOtp -> code !! (X)
- * /signUp -> store user data(Done)
- * /signIn -> !!
- * /logout -> !! 
- * /forgetPassword -> !!
- * /ResetPassword ->!!
- * ]
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- */
