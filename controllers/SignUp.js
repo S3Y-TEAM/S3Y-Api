@@ -29,7 +29,7 @@ const signUpController = async(req,res)=>{
             req.body.Password = password ;
             
             const values = req.body ;
-            console.log(values) ;
+            //console.log(values) ;
             // create user
             const user = await insertValues(values) ;
             res.status(201).json(user) ;
