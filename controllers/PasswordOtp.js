@@ -20,7 +20,7 @@ const passwordOtpController = async(req,res)=>{
             throw new Error("you are not allowed to access this route") ;
         }
     }catch(e){
-        res.status(400).json({error : "something went wrong .."})
+        res.status(400).json({error : e.message})
     }
 
     

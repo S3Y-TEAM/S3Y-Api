@@ -11,6 +11,7 @@ import {passwordOtpRoute} from './routes/PasswordOtp.js'
 import {resetPasswordRoute} from './routes/ResetPassword.js'
 import {logOutRoute} from "./routes/LogOut.js"
 import cookieParser from 'cookie-parser';
+import { rateLimit } from 'express-rate-limit'
 const app = express() ;
 
 const PORT = process.env.PORT || 8000 ;
@@ -29,7 +30,15 @@ app.use('/api/v1' , passwordOtpRoute) ;
 app.use('/api/v1' , resetPasswordRoute) ;
 app.use('/api/v1' , logOutRoute) ;
 
+// limiter 
+const limiter = rateLimit({
+	windowMs: 15 * 60 * 1000, 
+	limit: 100, 
+	standardHeaders: 'draft-7', 
+	legacyHeaders: false, 
+})
 
+app.use(limiter)
 app.listen(PORT , ()=> {
     console.log(`app is listening on port ${PORT}`) ;
 }

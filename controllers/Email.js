@@ -2,33 +2,36 @@ import  prisma  from "../db/prisma.js";
 import { isTokenValid } from "../utils/jwt.js";
 import { attachCookiesToResponse } from "../utils/jwt.js";
 const emailController = async(req,res)=>{
-    const token = req.signedCookies.token;
-    const decodedToken = isTokenValid({ token });
-    if(decodedToken.userName === req.body.userName && req.body.role===decodedToken.role){
-        const {role , email} = req.body ;
-        if(role === "employee" || role === "Employer"){
-            const emailExist = await checkEmailExistance(role , email) ;
-            if(emailExist){
-                res.status(400).json({
-                    valid : 0 ,
-                    error : 'this email already exist' ,
-                })
-            }else {
-                const payload = {
-                    email :  email ,
-                    role , 
-                    userName : decodedToken.userName
+    try{
+        const token = req.signedCookies.token;
+        const decodedToken = isTokenValid({ token });
+        if(decodedToken.userName === req.body.userName && req.body.role===decodedToken.role){
+            const {role , email} = req.body ;
+            if(role === "employee" || role === "Employer"){
+                const emailExist = await checkEmailExistance(role , email) ;
+                if(emailExist){
+                    throw new Error("this email already exist...") ;
+                }else {
+                    const payload = {
+                        email :  email ,
+                        role , 
+                        userName : decodedToken.userName
+                    }
+                    const token =  attachCookiesToResponse(res,payload) ;
+                    
+                    res.status(200).json({
+                        valid :1 ,
+                    })
                 }
-                const token =  attachCookiesToResponse(res,payload) ;
-                
-                res.status(200).json({
-                    valid :1 ,
-                })
+            }
+            else {
+                throw new Error("Enter Valid role !!!!!!")
             }
         }
-        else {
-            res.status(400).json({error:'Enter Valid role !!!!!!'}) ;
-        }
+    }catch(e){
+        res.status(400).json({
+            error : e.message
+        })
     }
 }
 

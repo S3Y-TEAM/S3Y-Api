@@ -10,9 +10,7 @@ const phoneController = async(req,res)=>{
         if((decodedToken.userName===req.body.userName)&&(role === "employee" || role === "Employer") && decodedToken.role===req.body.role){
             const phoneExist = await checkPhoneExistance(role , phone) ;
             if(phoneExist){
-                res.status(400).json({
-                    error : "this phone already exist"
-                })
+                throw new Error("this phone already exist")
             }else {
                 const payload = {
                     email :  decodedToken.email , 

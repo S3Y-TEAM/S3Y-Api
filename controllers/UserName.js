@@ -1,29 +1,30 @@
 import  prisma  from "../db/prisma.js";
 import { attachCookiesToResponse } from "../utils/jwt.js";
 const userNameController = async(req,res)=>{
-    const {role , userName} = req.body ;
-    req.headers.role = 'employee' ;
-    
-    if(role === "employee" || role === "Employer"){
-        const userNameExist = await checkUserNameExistance(role , userName) ;
-        if(userNameExist){
-            res.status(201).json({
-                valid : 0 ,
-            })
-        }else {
-            const payload = {
-                userName : userName , 
-                role
+    try{
+        const {role , userName} = req.body ;
+        
+        if(role === "employee" || role === "Employer"){
+            const userNameExist = await checkUserNameExistance(role , userName) ;
+            if(userNameExist){
+                throw new Error("user name exist ")
+            }else {
+                const payload = {
+                    userName : userName , 
+                    role
+                }
+                const token =  attachCookiesToResponse(res,payload) ;
+                res.status(201).json({
+                    valid :1 ,
+                })
             }
-            const token =  attachCookiesToResponse(res,payload) ;
-            res.status(201).json({
-                valid :1 ,
-            })
         }
-    }
-    else {
-        res.status(404).json({
-            error : "enter valid role !!" 
+        else {
+            throw new Error("enter valid role") ;
+        }
+    }catch(e){
+        res.status(400).json({
+            error : e.message 
         })
     }
 }

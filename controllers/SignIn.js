@@ -25,12 +25,10 @@ const signInController = async(req,res)=>{
                 email
             })
         }else {
-            res.status(404).json({
-                error : "invalid credentials"
-            })
+            throw new Error("invalid credentials")
         }
     }catch(e){
-        res.status(400).json({error : "something wrong .."})
+        res.status(400).json({error : e.message})
     }
 }
 export {

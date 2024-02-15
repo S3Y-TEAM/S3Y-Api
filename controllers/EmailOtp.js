@@ -5,7 +5,7 @@ import { attachCookiesToResponse } from "../utils/jwt.js";
 import { sendEmail } from "../utils/SendMail.js";
 import { generateCode } from "../utils/GenerateCdoe.js";
 const emailOtpController = async(req,res)=>{
-
+  try{
     const token = req.signedCookies.token;
     const decodedToken = isTokenValid({ token });
     if(decodedToken.email===req.body.email && req.body.role===decodedToken.role && decodedToken.userName===req.body.userName){
@@ -21,8 +21,13 @@ const emailOtpController = async(req,res)=>{
 
       res.status(200).json({codeNumber : codeNumber }) ;
     }else {
-      res.status(400).json({error : "You are not allowed to access this page"})
+      throw new Error("You are not allowed to access this page")
     }
+  }catch(e){
+    res.status(400).json({
+      error : e.message 
+    })
+  }
 }
 
 
