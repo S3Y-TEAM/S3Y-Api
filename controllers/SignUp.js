@@ -32,7 +32,7 @@ const signUpController = async(req,res)=>{
             //console.log(values) ;
             // create user
             const user = await insertValues(values) ;
-            res.status(201).json(user) ;
+            res.status(201).json({success : "user register successfully"}) ;
         }else {
             throw new Error("unAuthorized to access this route !")
         }
