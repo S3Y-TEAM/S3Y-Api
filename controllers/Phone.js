@@ -1,13 +1,19 @@
 import  prisma  from "../db/prisma.js";
 import { isTokenValid } from "../utils/jwt.js";
 import { attachCookiesToResponse } from "../utils/jwt.js";
+import { roleSelection } from "./UserName.js";
+import {isSameUserName} from './EmailOtp.js'
+import {isValidRole} from './UserName.js'
+import {isSameRole} from './EmailOtp.js'
 const phoneController = async(req,res)=>{
     try{
-        const {role , phone } = req.body ;
+        const {phone } = req.body ;
+        let {role} = req.headers ;
+        role = roleSelection(role) ;
         const token = req.signedCookies.token;
         const decodedToken = isTokenValid({ token });
         
-        if((decodedToken.userName===req.body.userName)&&(role === "employee" || role === "Employer") && decodedToken.role===req.body.role){
+        if(isSameUserName(decodedToken.userName,req.body.userName) && isValidRole(role) && isSameRole(decodedToken.role,role)){
             const phoneExist = await checkPhoneExistance(role , phone) ;
             if(phoneExist){
                 throw new Error("this phone already exist")

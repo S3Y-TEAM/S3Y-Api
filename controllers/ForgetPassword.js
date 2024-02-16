@@ -1,14 +1,13 @@
-import prisma from "../db/prisma.js" 
 import { attachCookiesToResponse } from "../utils/jwt.js";
-
+import { roleSelection } from "./UserName.js";
+import { checkEmailExistance } from "./Email.js";
 const forgetPasswordController = async(req,res)=>{
     try{
-        const {email , role} = req.body ;
-        const user = await prisma[`${role}`].findUnique({
-            where : {
-                Email : email
-            }
-        }) 
+        const {email} = req.body ;
+        let {role} = req.headers ;
+        role = roleSelection(role) ;
+        const user = await checkEmailExistance(role , email) ;
+        
         if(user){
             const payload = {
                 email :  email ,

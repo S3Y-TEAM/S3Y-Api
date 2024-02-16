@@ -4,34 +4,26 @@ import {checkUserNameExistance} from './UserName.js'
 import bcrypt from "bcrypt" ;
 import { isTokenValid } from "../utils/jwt.js";
 import { attachCookiesToResponse } from "../utils/jwt.js";
+import { roleSelection } from "./UserName.js";
+import { isSameUserName ,isSameRole , isSameEmail } from './EmailOtp.js';
+import { encryptPasswords } from './ResetPassword.js';
 const signUpController = async(req,res)=>{
     try{
+        let {role} = req.headers ;
+        role = roleSelection(role) ;
         //authorization 
         const token = req.signedCookies.token;
         const decodedToken = isTokenValid({ token });
-        // console.log(decodedToken) ;
         
-        if((decodedToken.userName===req.body.user_name)&&(decodedToken.role===req.body.role)&&((decodedToken.phone === req.body.Phone_number)||(decodedToken.email===req.body.Email))){
+        if(isSameUserName(decodedToken.userName , req.body.user_name) && isSameRole(decodedToken.role , role) && (isSamePhone(decodedToken.phone,req.body.Phone_number)||isSameEmail(decodedToken.email ,req.body.Email))){
             const workFactor = 10;
             let password = req.body.Password;
             
             // hashing password 
-            await bcrypt
-            .genSalt(workFactor)
-            .then(salt => {
-                return bcrypt.hash(password, salt);
-            })
-            .then(hash => {
-                password = hash ;
-            })
-            .catch(err => console.error(err.message));
-
+            password = await encryptPasswords(password) ;
             req.body.Password = password ;
-            
             const values = req.body ;
-            //console.log(values) ;
-            // create user
-            const user = await insertValues(values) ;
+            const user = await insertValues(values , role) ;
             res.status(201).json({success : "user register successfully"}) ;
         }else {
             throw new Error("unAuthorized to access this route !")
@@ -41,9 +33,9 @@ const signUpController = async(req,res)=>{
     }
 }
 
-const insertValues = async(values)=>{
+const insertValues = async(values , role)=>{
     try{
-        if(values.role === "employee"){
+        if(role === "employee"){
             
                 const user = await prisma.employee.create({
                     data: {
@@ -72,7 +64,7 @@ const insertValues = async(values)=>{
                 })
                 
                 return user ;
-        }else if(values.role==="Employer"){
+        }else if(role==="Employer"){
 
             const user = await prisma.Employer.create({
                 data: {
@@ -96,11 +88,13 @@ const insertValues = async(values)=>{
             throw new Error("enter valid role ..") 
         }
     }catch(e){
-        //console.log(e) ;
         throw new Error(e.message) ;
     }
 }
 
+const isSamePhone = (phoneFromToken , phoneFromBody)=>{
+    return (phoneFromToken === phoneFromBody) ;
+}
 export {
     signUpController
 }

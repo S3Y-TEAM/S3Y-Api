@@ -2,9 +2,11 @@ import  prisma  from "../db/prisma.js";
 import { attachCookiesToResponse } from "../utils/jwt.js";
 const userNameController = async(req,res)=>{
     try{
-        const {role , userName} = req.body ;
+        const {userName} = req.body ;
+        let {role} = req.headers
+        role = roleSelection(role) ;
         
-        if(role === "employee" || role === "Employer"){
+        if(isValidRole(role)){
             const userNameExist = await checkUserNameExistance(role , userName) ;
             if(userNameExist){
                 throw new Error("user name exist ")
@@ -39,7 +41,18 @@ const checkUserNameExistance = async(role , userName)=>{
     return (userNameExist!=null) ;
 }
 
+const roleSelection = (role)=>{
+    if(role === "dev" || role==="worker")role="employee" ;
+    else if(role==="emp")role="Employer" ;
+    return role ;
+}
+
+const isValidRole = (role)=>{
+    return (role === "employee" || role === "Employer") ;
+}
 export {
     userNameController , 
-    checkUserNameExistance
+    checkUserNameExistance ,
+    roleSelection , 
+    isValidRole
 }

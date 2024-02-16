@@ -1,13 +1,16 @@
 import  prisma  from "../db/prisma.js";
 import { isTokenValid } from "../utils/jwt.js";
 import { attachCookiesToResponse } from "../utils/jwt.js";
+import {roleSelection} from './UserName.js'
 const emailController = async(req,res)=>{
     try{
         const token = req.signedCookies.token;
         const decodedToken = isTokenValid({ token });
-        if(decodedToken.userName === req.body.userName && req.body.role===decodedToken.role){
-            const {role , email} = req.body ;
-            if(role === "employee" || role === "Employer"){
+        let {role} = req.headers ;
+        role = roleSelection(role) ;
+        if(decodedToken.userName === req.body.userName && role===decodedToken.role){
+            const {email} = req.body ;
+            if(isValidRole(role)){
                 const emailExist = await checkEmailExistance(role , email) ;
                 if(emailExist){
                     throw new Error("this email already exist...") ;
@@ -44,6 +47,9 @@ const checkEmailExistance = async(role , email)=>{
     return (emailExist!=null) ;
 }
 
+const isValidRole = (role)=>{
+    return (role === "employee" || role === "Employer") ;
+}
 export {
     emailController , 
     checkEmailExistance

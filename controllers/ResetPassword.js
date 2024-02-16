@@ -1,39 +1,25 @@
 import { isTokenValid } from "../utils/jwt.js";
 import prisma  from "../db/prisma.js";
 import bcrypt from  "bcrypt"
-
+import { roleSelection } from "./UserName.js";
+import {isSameRole} from './EmailOtp.js'
+import { isSameEmail } from "./EmailOtp.js";
 const resetPasswordController = async(req,res)=>{
     try{
-        const {newPassword , confirmPassword ,email , role} = req.body ;
+        const {newPassword , confirmPassword ,email} = req.body ;
+        let {role} = req.headers ;
+        role = roleSelection(role) ;
         let password = newPassword;
-        if(newPassword === confirmPassword){
-            // hashing password 
-            const workFactor = 10;
-            await bcrypt
-            .genSalt(workFactor)
-            .then(salt => {
-                return bcrypt.hash(password, salt);
-            })
-            .then(hash => {
-                password = hash ;
-            })
-            .catch(err => console.error(err.message));
-
+        if(isSamePassword(newPassword , confirmPassword)){
+            password = await encryptPasswords(password , 10) ;
         }else {
             throw new Error("password not match !!") ;
         }
 
         const token = req.signedCookies.token;
         const decodedToken = isTokenValid({ token });
-        if(decodedToken.email === req.body.email && decodedToken.role===req.body.role){
-            const updateUser = await prisma[`${role}`].update({
-                where : {
-                    Email : email
-                },
-                data :{
-                    Password : password
-                }
-            })
+        if(isSameEmail(decodedToken.email , req.body.email) && isSameRole(decodedToken.role,role)){
+            await updatePassword(role , email , password) ;
             // remove cookie
             res.cookie("token", "logout", {
                 httpOnly: true,
@@ -47,6 +33,39 @@ const resetPasswordController = async(req,res)=>{
         res.status(400).json({error:e.message}) ;
     }
 }
+
+const encryptPasswords = async(password , workFactor)=>{
+    await bcrypt
+        .genSalt(workFactor)
+        .then(salt => {
+            return bcrypt.hash(password, salt);
+        })
+        .then(hash => {
+            password = hash ;
+        })
+        .catch(err => console.error(err.message));
+    return password  ;
+}
+
+const isSamePassword = (newPassword , confirmPassword)=>{
+    return (newPassword===confirmPassword) ;
+}
+
+const updatePassword = async(role , email , password)=>{
+    await prisma[`${role}`].update({
+        where : {
+            Email : email
+        },
+        data :{
+            Password : password
+        }
+    })
+}
+
+
+
 export  {
-    resetPasswordController
+    resetPasswordController , 
+    encryptPasswords , 
+    updatePassword
 }
