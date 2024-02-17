@@ -34,7 +34,8 @@ const findCategories = async(role)=>{
         where : {
             parent : role
         }
-    })
+    }) ;
+    console.log(categories) ;
     return categories ;
 } 
 
