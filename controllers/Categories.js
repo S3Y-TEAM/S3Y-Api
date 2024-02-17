@@ -6,10 +6,11 @@ const categoriesController = async(req,res)=>{
         const token = req.signedCookies.token;
         const decodedToken = isTokenValid({ token });
         let {role} = req.headers ;
+        const specialization = role ;
         role = roleSelection(role) ;
 
         if(isValidRole(role) && isSameUserName(decodedToken.userName ,req.body.userName)){
-            const categoriesList = await insertCategories(req.body.name) ;
+            const categoriesList = await findCategories(specialization) ;
             res.status(200).json(categoriesList) ;
         }else {
             throw new Error("You are not allowed to access this page")
@@ -28,18 +29,15 @@ const isSameUserName = (userNameFromToken , userNameFromBody)=>{
     return (userNameFromToken === userNameFromBody) ;
 }
 
-const insertCategories = async(categoriesNames)=>{
-    let categoriesList = [] ;
-    for(const cat of categoriesNames){
-        const categories = await prisma.category.create({
-            data : {
-                name : cat  ,
-            } 
-        })
-        categoriesList.push(categories) ;
-    }
-    return categoriesList ;
-}
+const findCategories = async(role)=>{
+    const categories = await prisma.category.findMany({
+        where : {
+            parent : role
+        }
+    })
+    return categories ;
+} 
+
 export {
     categoriesController ,
 }

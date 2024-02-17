@@ -3,6 +3,9 @@ import { attachCookiesToResponse } from "../utils/jwt.js";
 const userNameController = async(req,res)=>{
     try{
         const {userName} = req.body ;
+        if(!validUserName(userName)){
+            throw new Error("invalid user name") ;
+        }
         let {role} = req.headers
         role = roleSelection(role) ;
         
@@ -49,6 +52,11 @@ const roleSelection = (role)=>{
 
 const isValidRole = (role)=>{
     return (role === "employee" || role === "Employer") ;
+}
+
+const validUserName = (userName)=>{
+    const usernameRegex = /^[a-zA-Z][a-zA-Z0-9_]{2,19}$/;
+    return (usernameRegex.test(userName)) ;
 }
 export {
     userNameController , 

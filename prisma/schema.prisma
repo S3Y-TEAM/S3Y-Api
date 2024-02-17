@@ -86,6 +86,7 @@ model Tasks_has_employee {
 model category {
   name                  String                @db.VarChar(20)
   id                    Int                   @id @unique(map: "id_UNIQUE") @default(autoincrement())
+  parent                  String                @db.VarChar(45)
   employee_has_category EmployeeHasCategory[]
   Tasks                 Tasks[]
 }
