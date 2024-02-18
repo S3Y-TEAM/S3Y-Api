@@ -3,6 +3,7 @@ import { attachCookiesToResponse } from "../utils/jwt.js";
 import { sendEmail } from "../utils/SendMail.js";
 import { generateCode } from "../utils/GenerateCdoe.js";
 import { roleSelection } from "./UserName.js";
+import { responseBody } from "../utils/ResponseBody.js";
 const emailOtpController = async(req,res)=>{
   try{
     const token = req.signedCookies.token;
@@ -20,14 +21,12 @@ const emailOtpController = async(req,res)=>{
       }
       const token =  attachCookiesToResponse(res,payload) ;
 
-      res.status(200).json({codeNumber : codeNumber }) ;
+      res.status(200).json(responseBody("success" , "verification code sent successfully" , 200 , {codeNumber})) ;
     }else {
       throw new Error("You are not allowed to access this page")
     }
   }catch(e){
-    res.status(400).json({
-      error : e.message 
-    })
+    res.status(400).json(responseBody("failed" , e.message , 400 , null)) 
   }
 }
 

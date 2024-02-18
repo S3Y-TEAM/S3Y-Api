@@ -2,6 +2,7 @@ import prisma from "../db/prisma.js";
 import { attachCookiesToResponse } from "../utils/jwt.js";
 import bcrypt from "bcrypt"
 import { roleSelection } from "./UserName.js";
+import { responseBody } from "../utils/ResponseBody.js";
 const signInController = async(req,res)=>{
     try{
         const {email , password}  = req.body ;
@@ -16,9 +17,7 @@ const signInController = async(req,res)=>{
                     role , 
                 }
                 const token =  attachCookiesToResponse(res,payload) ;
-                res.status(200).json({
-                    email
-                })
+                res.status(200).json(responseBody("success" , "welcome to s3y" , 200 , {email}))
             }else {
                 throw new Error("invalid credentials") ;
             }
@@ -26,7 +25,7 @@ const signInController = async(req,res)=>{
             throw new Error("invalid credentials")
         }
     }catch(e){
-        res.status(400).json({error : e.message})
+        res.status(400).json(responseBody("failed" , e.message , 400 , null))
     }
 }
 

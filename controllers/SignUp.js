@@ -7,6 +7,7 @@ import { attachCookiesToResponse } from "../utils/jwt.js";
 import { roleSelection } from "./UserName.js";
 import { isSameUserName ,isSameRole , isSameEmail } from './EmailOtp.js';
 import { encryptPasswords } from './ResetPassword.js';
+import { responseBody } from '../utils/ResponseBody.js';
 const signUpController = async(req,res)=>{
     try{
         let {role} = req.headers ;
@@ -14,22 +15,24 @@ const signUpController = async(req,res)=>{
         //authorization 
         const token = req.signedCookies.token;
         const decodedToken = isTokenValid({ token });
-        
+        const {Email , user_name} = req.body ;
+        // phone or email because phone page may be skipped
         if(isSameUserName(decodedToken.userName , req.body.user_name) && isSameRole(decodedToken.role , role) && (isSamePhone(decodedToken.phone,req.body.Phone_number)||isSameEmail(decodedToken.email ,req.body.Email))){
             const workFactor = 10;
             let password = req.body.Password;
-            
+             
             // hashing password 
             password = await encryptPasswords(password) ;
             req.body.Password = password ;
             const values = req.body ;
             const user = await insertValues(values , role) ;
-            res.status(201).json({success : "user register successfully"}) ;
+            attachCookiesToResponse(res,{Email}) ;
+            res.status(201).json(responseBody("success" , "successfully registered" , 201 , {Email , user_name})) ;
         }else {
             throw new Error("unAuthorized to access this route !")
         }
     }catch(e){
-        res.status(400).json({error : e.message}) ;
+        res.status(400).json(responseBody("failed" , e.message , 400 , null)) ;
     }
 }
 
@@ -85,7 +88,7 @@ const insertValues = async(values , role)=>{
 
 
         }else {
-            throw new Error("enter valid role ..") 
+            throw new Error("invalid role ..") 
         }
     }catch(e){
         throw new Error(e.message) ;

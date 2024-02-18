@@ -1,5 +1,6 @@
 import  prisma  from "../db/prisma.js";
 import { attachCookiesToResponse } from "../utils/jwt.js";
+import { responseBody } from "../utils/ResponseBody.js";
 const userNameController = async(req,res)=>{
     try{
         const {userName} = req.body ;
@@ -19,18 +20,14 @@ const userNameController = async(req,res)=>{
                     role
                 }
                 const token =  attachCookiesToResponse(res,payload) ;
-                res.status(201).json({
-                    valid :1 ,
-                })
+                res.status(200).json(responseBody("success" , "valid user name" , 200 , {userName})) ;
             }
         }
         else {
             throw new Error("enter valid role") ;
         }
     }catch(e){
-        res.status(400).json({
-            error : e.message 
-        })
+        res.status(400).json(responseBody("failed" , e.message , 400 , null)) ;
     }
 }
 

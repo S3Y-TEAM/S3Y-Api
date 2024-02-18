@@ -1,6 +1,7 @@
 import  prisma  from "../db/prisma.js";
 import { isTokenValid } from "../utils/jwt.js";
 import {roleSelection} from './UserName.js'
+import { responseBody } from "../utils/ResponseBody.js";
 const categoriesController = async(req,res)=>{
     try{
         const token = req.signedCookies.token;
@@ -11,14 +12,12 @@ const categoriesController = async(req,res)=>{
 
         if(isValidRole(role) && isSameUserName(decodedToken.userName ,req.body.userName)){
             const categoriesList = await findCategories(specialization) ;
-            res.status(200).json(categoriesList) ;
+            res.status(200).json(responseBody("success" , `categories of ${specialization}` , 200 , categoriesList)) ;
         }else {
             throw new Error("You are not allowed to access this page")
         }
     }catch(e){
-        res.status(400).json({
-            error : e.message 
-        })
+        res.status(400).json(responseBody("failed" , e.message , 400 , null));
     }
 }
 const isValidRole = (role)=>{
@@ -35,7 +34,6 @@ const findCategories = async(role)=>{
             parent : role
         }
     }) ;
-    console.log(categories) ;
     return categories ;
 } 
 

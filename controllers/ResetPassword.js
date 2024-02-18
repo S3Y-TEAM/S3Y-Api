@@ -4,6 +4,7 @@ import bcrypt from  "bcrypt"
 import { roleSelection } from "./UserName.js";
 import {isSameRole} from './EmailOtp.js'
 import { isSameEmail } from "./EmailOtp.js";
+import { responseBody } from "../utils/ResponseBody.js";
 const resetPasswordController = async(req,res)=>{
     try{
         const {newPassword , confirmPassword ,email} = req.body ;
@@ -25,12 +26,12 @@ const resetPasswordController = async(req,res)=>{
                 httpOnly: true,
                 expires: new Date(Date.now()),
             });
-            res.status(201).json({email});
+            res.status(201).json(responseBody("success" , "password updated successfully" , 201 , null));
         }else {
             throw new Error("you are not allowed to access this route!!") 
         }
     }catch(e){
-        res.status(400).json({error:e.message}) ;
+        res.status(400).json(responseBody("failed" , e.message , 400 , null)) ;
     }
 }
 

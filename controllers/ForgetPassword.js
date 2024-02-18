@@ -1,6 +1,7 @@
 import { attachCookiesToResponse } from "../utils/jwt.js";
 import { roleSelection } from "./UserName.js";
 import { checkEmailExistance } from "./Email.js";
+import { responseBody } from "../utils/ResponseBody.js";
 const forgetPasswordController = async(req,res)=>{
     try{
         const {email} = req.body ;
@@ -14,14 +15,12 @@ const forgetPasswordController = async(req,res)=>{
                 role , 
             }
             const token =  attachCookiesToResponse(res,payload) ;
-            res.status(200).json({
-                email  , 
-            })
+            res.status(200).json(responseBody("success" , "valid email" , 200 , {email}))
         }else {
             throw new Error('this mail does not exist') ;
         }
     }catch(e){
-        res.status(400).json({error:e.message}) ;
+        res.status(400).json(responseBody("failed" , e.message , 400 , null)) ;
     }
 }
 export {

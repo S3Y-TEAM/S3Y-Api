@@ -5,6 +5,7 @@ import { attachCookiesToResponse } from "../utils/jwt.js";
 import { roleSelection } from "./UserName.js";
 import { isSameEmail } from "./EmailOtp.js";
 import { isSameRole } from "./EmailOtp.js";
+import { responseBody } from "../utils/ResponseBody.js";
 const passwordOtpController = async(req,res)=>{
     try{
         const {email} = req.body ;
@@ -20,12 +21,12 @@ const passwordOtpController = async(req,res)=>{
                 role , 
             }
             const token =  attachCookiesToResponse(res,payload) ;
-            res.status(200).json({codeNumber})
+            res.status(200).json(responseBody("success" , "verification code sent successfully" , 200 , {codeNumber}))
         }else {
             throw new Error("you are not allowed to access this route") ;
         }
     }catch(e){
-        res.status(400).json({error : e.message})
+        res.status(400).json(responseBody("failed" , e.message , 400 , null))
     }
 
     

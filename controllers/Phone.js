@@ -5,6 +5,7 @@ import { roleSelection } from "./UserName.js";
 import {isSameUserName} from './EmailOtp.js'
 import {isValidRole} from './UserName.js'
 import {isSameRole} from './EmailOtp.js'
+import { responseBody } from "../utils/ResponseBody.js";
 const phoneController = async(req,res)=>{
     try{
         const {phone } = req.body ;
@@ -25,16 +26,14 @@ const phoneController = async(req,res)=>{
                     userName : decodedToken.userName
                 }
                 const token =  attachCookiesToResponse(res,payload) ;
-                res.status(201).json({
-                phone   
-                })
+                res.status(200).json(responseBody("success" , "valid phone number" , 200 , {phone}))
             }
         }
         else {
             throw new Error("unAuthorized to access this route .. ") ;
         }
     }catch(e){
-        res.status(400).json({error : e.message}) ;
+        res.status(400).json(responseBody("failed" , e.message , 400 , null)) ;
     }
 }
 

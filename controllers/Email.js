@@ -2,6 +2,7 @@ import  prisma  from "../db/prisma.js";
 import { isTokenValid } from "../utils/jwt.js";
 import { attachCookiesToResponse } from "../utils/jwt.js";
 import {roleSelection} from './UserName.js'
+import { responseBody } from "../utils/ResponseBody.js";
 const emailController = async(req,res)=>{
     try{
         const token = req.signedCookies.token;
@@ -22,19 +23,17 @@ const emailController = async(req,res)=>{
                     }
                     const token =  attachCookiesToResponse(res,payload) ;
                     
-                    res.status(200).json({
-                        valid :1 ,
-                    })
+                    res.status(200).json(responseBody("success" , "valid email" , 200 , {email})) ;
                 }
             }
             else {
-                throw new Error("Enter Valid role !!!!!!")
+                throw new Error("Enter Valid role ")
             }
+        }else {
+            throw new Error("unauthorized to access this route")
         }
     }catch(e){
-        res.status(400).json({
-            error : e.message
-        })
+        res.status(400).json(responseBody("failed" , e.message , 400 , null)) ;
     }
 }
 
