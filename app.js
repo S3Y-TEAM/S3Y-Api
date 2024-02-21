@@ -12,8 +12,9 @@ import {resetPasswordRoute} from './routes/ResetPassword.js'
 import {logOutRoute} from "./routes/LogOut.js"
 import cookieParser from 'cookie-parser';
 import { rateLimit } from 'express-rate-limit'
+import cors from  'cors' ;
 const app = express() ;
-
+app.use(cors())
 const PORT = process.env.PORT || 8000 ;
 
 app.use(express.json()) ;

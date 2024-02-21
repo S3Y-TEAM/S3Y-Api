@@ -27,7 +27,7 @@ const userNameController = async(req,res)=>{
             throw new Error("enter valid role") ;
         }
     }catch(e){
-        res.status(400).json(responseBody("failed" , e.message , 400 , null)) ;
+        res.status(400).json(responseBody("failed" , e.message , 400 , userName)) ;
     }
 }
 
