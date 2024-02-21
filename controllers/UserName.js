@@ -2,8 +2,8 @@ import  prisma  from "../db/prisma.js";
 import { attachCookiesToResponse } from "../utils/jwt.js";
 import { responseBody } from "../utils/ResponseBody.js";
 const userNameController = async(req,res)=>{
+    const {userName} = req.body ;
     try{
-        const {userName} = req.body ;
         if(!validUserName(userName)){
             throw new Error("invalid user name") ;
         }
