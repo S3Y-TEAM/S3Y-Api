@@ -11,8 +11,9 @@ const userNameController = async(req,res)=>{
         role = roleSelection(role) ;
         
         if(isValidRole(role)){
-            const userNameExist = await checkUserNameExistance(role , userName) ;
-            if(userNameExist){
+            const userNameExistInEmployee = await checkUserNameExistance('employee' , userName) ;
+            const userNameExistInEmployer = await checkUserNameExistance('Employer' , userName) ;
+            if(userNameExistInEmployee || userNameExistInEmployer){
                 throw new Error("user name exist ")
             }else {
                 const payload = {

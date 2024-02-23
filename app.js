@@ -53,3 +53,14 @@ app.listen(PORT , ()=> {
 }
 )
 
+
+
+/**
+ * 
+ * 
+ * certficates / projects
+ * id , name ,  descr , link (project) ;
+ * id , name ,  pdf (certficate) 
+ * 
+ * user name unique over all usernames
+ */
