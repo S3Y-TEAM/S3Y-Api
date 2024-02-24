@@ -17,7 +17,7 @@ const signInController = async(req,res)=>{
                     role , 
                 }
                 const token =  attachCookiesToResponse(res,payload) ;
-                res.status(200).json(responseBody("success" , "welcome to s3y" , 200 , {email}))
+                res.status(200).json(responseBody("success" , "welcome to s3y" , 200 , {token}))
             }else {
                 throw new Error("invalid credentials") ;
             }

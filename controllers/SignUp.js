@@ -9,9 +9,9 @@ import { isSameUserName ,isSameRole , isSameEmail } from './EmailOtp.js';
 import { encryptPasswords } from './ResetPassword.js';
 import { responseBody } from '../utils/ResponseBody.js';
 const signUpController = async(req,res)=>{
+    let {role} = req.headers ;
+    role = roleSelection(role) ;
     try{
-        let {role} = req.headers ;
-        role = roleSelection(role) ;
         //authorization 
         const token = req.signedCookies.token;
         const decodedToken = isTokenValid({ token });
@@ -25,13 +25,17 @@ const signUpController = async(req,res)=>{
             password = await encryptPasswords(password) ;
             req.body.Password = password ;
             const values = req.body ;
-            const user = await insertValues(values , role) ;
-            attachCookiesToResponse(res,{Email}) ;
-            res.status(201).json(responseBody("success" , "successfully registered" , 201 , {Email , user_name})) ;
+            let user = await insertValues(values , role) ;
+            delete user.Password ;
+            const payload = user ;
+            //console.log(payload) ;
+            const token = attachCookiesToResponse(res,payload) ;
+            res.status(201).json(responseBody("success" , "successfully registered" , 201 , {token})) ;
         }else {
             throw new Error("unAuthorized to access this route !")
         }
     }catch(e){
+        //await deleteValue(req.body.Email , role) ;
         res.status(400).json(responseBody("failed" , e.message , 400 , null)) ;
     }
 }
@@ -94,6 +98,19 @@ const insertValues = async(values , role)=>{
         throw new Error(e.message) ;
     }
 }
+
+// const deleteValue = async (Email , role)=>{
+//     const userData = await prisma[`${role}`].findUnique({
+//         where : {
+//             Email : Email
+//         }
+//     })
+//     const user = await prisma[`${role}`].delete({
+//         where : {
+//             id : userData.id
+//         }
+//     })
+// }
 
 const isSamePhone = (phoneFromToken , phoneFromBody)=>{
     return (phoneFromToken === phoneFromBody) ;

@@ -4,13 +4,14 @@ import {roleSelection} from './UserName.js'
 import { responseBody } from "../utils/ResponseBody.js";
 const categoriesController = async(req,res)=>{
     try{
+        const clientToken = req.headers.authorization.split(' ')[1] ;
         const token = req.signedCookies.token;
         const decodedToken = isTokenValid({ token });
         let {role} = req.headers ;
         const specialization = role ;
         role = roleSelection(role) ;
-
-        if(isValidRole(role) && isSameUserName(decodedToken.userName ,req.body.userName)){
+        console.log((clientToken===token)) ;
+        if((clientToken===token) || (isValidRole(role) && isSameUserName(decodedToken.userName ,req.body.userName))){
             const categoriesList = await findCategories(specialization) ;
             res.status(200).json(responseBody("success" , `categories of ${specialization}` , 200 , categoriesList)) ;
         }else {

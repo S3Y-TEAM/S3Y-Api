@@ -30,7 +30,7 @@ model Links {
   Github      String?  @db.VarChar(45)
   other       String?  @db.VarChar(45)
   employee_id Int
-  employee    employee @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Links_employee1")
+  employee    employee @relation(fields: [employee_id], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "fk_Links_employee1")
 
   @@id([id, employee_id])
   @@index([employee_id], map: "fk_Links_employee1_idx")
@@ -59,10 +59,10 @@ model Tasks {
   category_id        Int
   Payments_id        Int
   reviews_id         Int
-  Employer           Employer            @relation(fields: [Employer_emp_id], references: [emp_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Tasks_Employer1")
-  Payments           Payments            @relation(fields: [Payments_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Tasks_Payments1")
-  category           category            @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Tasks_category1")
-  reviews            reviews             @relation(fields: [reviews_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Tasks_reviews1")
+  Employer           Employer            @relation(fields: [Employer_emp_id], references: [emp_id], onDelete: Cascade, onUpdate: Cascade, map: "fk_Tasks_Employer1")
+  Payments           Payments            @relation(fields: [Payments_id], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "fk_Tasks_Payments1")
+  category           category            @relation(fields: [category_id], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "fk_Tasks_category1")
+  reviews            reviews             @relation(fields: [reviews_id], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "fk_Tasks_reviews1")
   Tasks_has_employee Tasks_has_employee?
 
   @@id([id, Employer_emp_id, category_id, Payments_id, reviews_id])
@@ -75,8 +75,8 @@ model Tasks {
 model Tasks_has_employee {
   Tasks_id    Int      @unique(map: "Tasks_id_UNIQUE")
   employee_id Int      @unique(map: "employee_id_UNIQUE")
-  Tasks       Tasks    @relation(fields: [Tasks_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Tasks_has_employee_Tasks")
-  employee    employee @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Tasks_has_employee_employee1")
+  Tasks       Tasks    @relation(fields: [Tasks_id], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "fk_Tasks_has_employee_Tasks")
+  employee    employee @relation(fields: [employee_id], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "fk_Tasks_has_employee_employee1")
 
   @@id([Tasks_id, employee_id])
   @@index([Tasks_id], map: "fk_Tasks_has_employee_Tasks_idx")
@@ -95,7 +95,7 @@ model certficates {
   id          Int      @unique(map: "id_UNIQUE") @default(autoincrement())
   name        String   @db.VarChar(45)
   employee_id Int
-  employee    employee @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_certficates_employee1")
+  employee    employee @relation(fields: [employee_id], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "fk_certficates_employee1")
 
   @@id([id, employee_id])
   @@index([employee_id], map: "fk_certficates_employee1_idx")
@@ -126,8 +126,8 @@ model employee {
 model EmployeeHasCategory {
   employee_id Int
   category_id Int
-  category    category @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_employee_has_category_category1")
-  employee    employee @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_employee_has_category_employee1")
+  category    category @relation(fields: [category_id], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "fk_employee_has_category_category1")
+  employee    employee @relation(fields: [employee_id], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "fk_employee_has_category_employee1")
 
   @@id([employee_id, category_id])
   @@index([category_id], map: "fk_employee_has_category_category1_idx")
@@ -141,8 +141,8 @@ model messages {
   Date            DateTime @db.DateTime(0)
   employee_id     Int
   Employer_emp_id Int
-  Employer        Employer @relation(fields: [Employer_emp_id], references: [emp_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_messages_Employer1")
-  employee        employee @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_messages_employee1")
+  Employer        Employer @relation(fields: [Employer_emp_id], references: [emp_id], onDelete: Cascade, onUpdate: Cascade, map: "fk_messages_Employer1")
+  employee        employee @relation(fields: [employee_id], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "fk_messages_employee1")
 
   @@id([id, employee_id, Employer_emp_id])
   @@index([Employer_emp_id], map: "fk_messages_Employer1_idx")
@@ -155,8 +155,8 @@ model problems {
   img             Bytes
   Employer_emp_id Int
   employee_id     Int
-  Employer        Employer @relation(fields: [Employer_emp_id], references: [emp_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_problems_Employer1")
-  employee        employee @relation(fields: [employee_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_problems_employee1")
+  Employer        Employer @relation(fields: [Employer_emp_id], references: [emp_id], onDelete: Cascade, onUpdate: Cascade, map: "fk_problems_Employer1")
+  employee        employee @relation(fields: [employee_id], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "fk_problems_employee1")
 
   @@id([id, Employer_emp_id, employee_id])
   @@index([Employer_emp_id], map: "fk_problems_Employer1_idx")
