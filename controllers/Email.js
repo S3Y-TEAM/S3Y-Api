@@ -5,11 +5,12 @@ import {roleSelection} from './UserName.js'
 import { responseBody } from "../utils/ResponseBody.js";
 const emailController = async(req,res)=>{
     try{
-        const token = req.signedCookies.token;
+        let token = req.signedCookies.token;
+        const clientToken = req.headers.authorization.split(' ')[1] ;
         const decodedToken = isTokenValid({ token });
         let {role} = req.headers ;
         role = roleSelection(role) ;
-        if(decodedToken.userName === req.body.userName && role===decodedToken.role){
+        if(clientToken === token){
             const {email} = req.body ;
             if(isValidRole(role)){
                 const emailExist = await checkEmailExistance(role , email) ;
@@ -21,8 +22,8 @@ const emailController = async(req,res)=>{
                         role , 
                         userName : decodedToken.userName
                     }
-                    const token =  attachCookiesToResponse(res,payload) ;
-                    
+                    token =  attachCookiesToResponse(res,payload) ;
+                    res.setHeader('Authorization', `Bearer ${token}`)
                     res.status(200).json(responseBody("success" , "valid email" , 200 , {email})) ;
                 }
             }

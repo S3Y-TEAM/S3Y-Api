@@ -2,8 +2,6 @@ import { isTokenValid } from "../utils/jwt.js";
 import prisma  from "../db/prisma.js";
 import bcrypt from  "bcrypt"
 import { roleSelection } from "./UserName.js";
-import {isSameRole} from './EmailOtp.js'
-import { isSameEmail } from "./EmailOtp.js";
 import { responseBody } from "../utils/ResponseBody.js";
 const resetPasswordController = async(req,res)=>{
     try{
@@ -17,15 +15,17 @@ const resetPasswordController = async(req,res)=>{
             throw new Error("password not match !!") ;
         }
 
-        const token = req.signedCookies.token;
+        let token = req.signedCookies.token;
         const decodedToken = isTokenValid({ token });
-        if(isSameEmail(decodedToken.email , req.body.email) && isSameRole(decodedToken.role,role)){
+        const clientToken = req.headers.authorization.split(' ')[1] ;
+        if(token === clientToken){
             await updatePassword(role , email , password) ;
             // remove cookie
             res.cookie("token", "logout", {
                 httpOnly: true,
                 expires: new Date(Date.now()),
             });
+            
             res.status(201).json(responseBody("success" , "password updated successfully" , 201 , null));
         }else {
             throw new Error("you are not allowed to access this route!!") 

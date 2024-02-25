@@ -6,21 +6,24 @@ import { roleSelection } from "./UserName.js";
 import { responseBody } from "../utils/ResponseBody.js";
 const emailOtpController = async(req,res)=>{
   try{
-    const token = req.signedCookies.token;
+    let token = req.signedCookies.token;
     const decodedToken = isTokenValid({ token });
+    const clientToken = req.headers.authorization.split(' ')[1] ;
     let {role} = req.headers ;
     role = roleSelection(role) ;
-    const {email} = req.body ;
-    if(isSameEmail(decodedToken.email,req.body.email) && isSameRole(role,decodedToken.role) && isSameUserName(decodedToken.userName,req.body.userName)){
+    const email = decodedToken.email ;
+    
+    if(clientToken===token){
       let codeNumber = await generateCode(5);
       await sendEmail(email,codeNumber) ;
       const payload = {
           email :  email , 
           role ,
-          userName : decodedToken.userName
+          userName : decodedToken.userName ,
+          RandomNumberForSecurity : Math.floor(Math.random() * 1e9) + 1
       }
-      const token =  attachCookiesToResponse(res,payload) ;
-
+      token =  attachCookiesToResponse(res,payload) ;
+      res.setHeader('Authorization', `Bearer ${token}`)
       res.status(200).json(responseBody("success" , "verification code sent successfully" , 200 , {codeNumber})) ;
     }else {
       throw new Error("You are not allowed to access this page")
@@ -30,19 +33,8 @@ const emailOtpController = async(req,res)=>{
   }
 }
 
-const isSameEmail = (emailFromToken , emailFromBody)=>{
-  return (emailFromToken === emailFromBody) ;
-}
-const isSameRole = (roleFromToken , roleFromBody)=>{
-  return (roleFromToken === roleFromBody) ;
-}
-const isSameUserName = (userNameFromToken , userNameFromBody)=>{
-  return (userNameFromToken === userNameFromBody) ;
-}
+
 
 export {
-  emailOtpController ,
-  isSameEmail ,
-  isSameRole ,
-  isSameUserName
+  emailOtpController 
 } ;

@@ -5,14 +5,14 @@ import { responseBody } from "../utils/ResponseBody.js";
 const categoriesController = async(req,res)=>{
     try{
         const clientToken = req.headers.authorization.split(' ')[1] ;
-        const token = req.signedCookies.token;
+        let token = req.signedCookies.token;
         const decodedToken = isTokenValid({ token });
         let {role} = req.headers ;
         const specialization = role ;
         role = roleSelection(role) ;
-        console.log((clientToken===token)) ;
-        if((clientToken===token) || (isValidRole(role) && isSameUserName(decodedToken.userName ,req.body.userName))){
+        if(clientToken===token){
             const categoriesList = await findCategories(specialization) ;
+            res.setHeader('Authorization', `Bearer ${token}`)
             res.status(200).json(responseBody("success" , `categories of ${specialization}` , 200 , categoriesList)) ;
         }else {
             throw new Error("You are not allowed to access this page")

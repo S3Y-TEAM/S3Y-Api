@@ -3,24 +3,24 @@ import { sendEmail } from "../utils/SendMail.js";
 import { generateCode } from "../utils/GenerateCdoe.js";
 import { attachCookiesToResponse } from "../utils/jwt.js";
 import { roleSelection } from "./UserName.js";
-import { isSameEmail } from "./EmailOtp.js";
-import { isSameRole } from "./EmailOtp.js";
 import { responseBody } from "../utils/ResponseBody.js";
 const passwordOtpController = async(req,res)=>{
     try{
         const {email} = req.body ;
         let {role} = req.headers ;
         role = roleSelection(role) ;
-        const token = req.signedCookies.token;
+        let token = req.signedCookies.token;
+        const clientToken = req.headers.authorization.split(' ')[1] ;
         const decodedToken = isTokenValid({token}) ;
-        if(isSameEmail(email , decodedToken.email) && isSameRole(role , decodedToken.role)){
+        if(clientToken === token){
             const codeNumber = await generateCode(5) ;
             const emailSent = await sendEmail(email , codeNumber) ;
             const payload = {
                 email :  email ,
                 role , 
             }
-            const token =  attachCookiesToResponse(res,payload) ;
+            token =  attachCookiesToResponse(res,payload) ;
+            res.setHeader('Authorization', `Bearer ${token}`)
             res.status(200).json(responseBody("success" , "verification code sent successfully" , 200 , {codeNumber}))
         }else {
             throw new Error("you are not allowed to access this route") ;

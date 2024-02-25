@@ -5,7 +5,6 @@ import bcrypt from "bcrypt" ;
 import { isTokenValid } from "../utils/jwt.js";
 import { attachCookiesToResponse } from "../utils/jwt.js";
 import { roleSelection } from "./UserName.js";
-import { isSameUserName ,isSameRole , isSameEmail } from './EmailOtp.js';
 import { encryptPasswords } from './ResetPassword.js';
 import { responseBody } from '../utils/ResponseBody.js';
 const signUpController = async(req,res)=>{
@@ -13,11 +12,18 @@ const signUpController = async(req,res)=>{
     role = roleSelection(role) ;
     try{
         //authorization 
-        const token = req.signedCookies.token;
+        let token = req.signedCookies.token;
         const decodedToken = isTokenValid({ token });
-        const {Email , user_name} = req.body ;
+        const {Email , user_name , National_id ,Phone_number} = req.body ;
+        await isValidNationalId(National_id,role) ;
+        
+        isSamePhone(decodedToken.phone ,Phone_number) ;
+        isSameEmail(decodedToken.email ,Email)
+        isSameUserName(decodedToken.userName , user_name) ;
+    
+        const clientToken = req.headers.authorization.split(' ')[1] ;
         // phone or email because phone page may be skipped
-        if(isSameUserName(decodedToken.userName , req.body.user_name) && isSameRole(decodedToken.role , role) && (isSamePhone(decodedToken.phone,req.body.Phone_number)||isSameEmail(decodedToken.email ,req.body.Email))){
+        if(token === clientToken){
             const workFactor = 10;
             let password = req.body.Password;
              
@@ -29,13 +35,14 @@ const signUpController = async(req,res)=>{
             delete user.Password ;
             const payload = user ;
             //console.log(payload) ;
-            const token = attachCookiesToResponse(res,payload) ;
-            res.status(201).json(responseBody("success" , "successfully registered" , 201 , {token})) ;
+            token = attachCookiesToResponse(res,payload) ;
+            res.setHeader('Authorization', `Bearer ${token}`)
+            res.status(201).json(responseBody("success" , "successfully registered" , 201 , {user})) ;
         }else {
             throw new Error("unAuthorized to access this route !")
         }
     }catch(e){
-        //await deleteValue(req.body.Email , role) ;
+        
         res.status(400).json(responseBody("failed" , e.message , 400 , null)) ;
     }
 }
@@ -99,22 +106,32 @@ const insertValues = async(values , role)=>{
     }
 }
 
-// const deleteValue = async (Email , role)=>{
-//     const userData = await prisma[`${role}`].findUnique({
-//         where : {
-//             Email : Email
-//         }
-//     })
-//     const user = await prisma[`${role}`].delete({
-//         where : {
-//             id : userData.id
-//         }
-//     })
-// }
+const isValidNationalId = async(id , role)=>{
+    const user = await prisma[`${role}`].findUnique({
+        where :{
+            National_id : id
+        }
+    })
+    if(user){
+        throw new Error ('invalid national id') ;
+    }
+    return true ;
+}
 
 const isSamePhone = (phoneFromToken , phoneFromBody)=>{
-    return (phoneFromToken === phoneFromBody) ;
+    if(phoneFromToken === phoneFromBody)return 1 ;
+    else throw new Error('invalid phone number ') ;
 }
+const isSameEmail = (emailFromToken , emailFromBody)=>{
+    if(emailFromToken === emailFromBody)return 1 ;
+    else throw new Error('invalid Email') ;
+}
+
+const isSameUserName = (userNameFromToken , userNameFromBody)=>{
+    if(userNameFromToken === userNameFromBody)return 1;
+    else throw new Error ('invalid username')
+}
+
 export {
     signUpController
 }

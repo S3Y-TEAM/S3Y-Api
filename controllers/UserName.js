@@ -20,7 +20,7 @@ const userNameController = async(req,res)=>{
                     userName : userName , 
                     role
                 }
-                const token =  attachCookiesToResponse(res,payload) ;
+                let token =  attachCookiesToResponse(res,payload) ;
                 res.setHeader('Authorization', `Bearer ${token}`)
                 res.status(200).json(responseBody("success" , "valid user name" , 200 , {userName})) ;
             }

@@ -15,6 +15,7 @@ const forgetPasswordController = async(req,res)=>{
                 role , 
             }
             const token =  attachCookiesToResponse(res,payload) ;
+            res.setHeader('Authorization', `Bearer ${token}`)
             res.status(200).json(responseBody("success" , "valid email" , 200 , {email}))
         }else {
             throw new Error('this mail does not exist') ;
