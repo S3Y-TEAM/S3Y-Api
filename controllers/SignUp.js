@@ -7,6 +7,8 @@ import { attachCookiesToResponse } from "../utils/jwt.js";
 import { roleSelection } from "./UserName.js";
 import { encryptPasswords } from './ResetPassword.js';
 import { responseBody } from '../utils/ResponseBody.js';
+import { isValidEmail } from './Phone.js';
+import { isValidUserName } from './Email.js';
 const signUpController = async(req,res)=>{
     let {role} = req.headers ;
     role = roleSelection(role) ;
@@ -17,9 +19,9 @@ const signUpController = async(req,res)=>{
         const {Email , user_name , National_id ,Phone_number} = req.body ;
         await isValidNationalId(National_id,role) ;
         
-        isSamePhone(decodedToken.phone ,Phone_number) ;
-        isSameEmail(decodedToken.email ,Email)
-        isSameUserName(decodedToken.userName , user_name) ;
+        isValidPhone(decodedToken.phone ,Phone_number) ;
+        isValidEmail(decodedToken.email ,Email)
+        isValidUserName(decodedToken.userName , user_name) ;
     
         // phone or email because phone page may be skipped
         if(decodedToken){
@@ -117,22 +119,15 @@ const isValidNationalId = async(id , role)=>{
     return true ;
 }
 
-const isSamePhone = (phoneFromToken , phoneFromBody)=>{
+const isValidPhone = (phoneFromToken , phoneFromBody)=>{
     if(phoneFromToken === phoneFromBody)return 1 ;
-    else throw new Error('invalid phone number ') ;
-}
-const isSameEmail = (emailFromToken , emailFromBody)=>{
-    if(emailFromToken === emailFromBody)return 1 ;
-    else throw new Error('invalid Email') ;
+    else throw new Error('You are not allowed to access this page !!!!!!') ;
 }
 
-const isSameUserName = (userNameFromToken , userNameFromBody)=>{
-    if(userNameFromToken === userNameFromBody)return 1;
-    else throw new Error ('invalid username')
-}
 
 export {
-    signUpController
+    signUpController ,
+    isValidPhone
 }
 
 

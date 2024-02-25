@@ -10,24 +10,20 @@ const userNameController = async(req,res)=>{
         let {role} = req.headers
         role = roleSelection(role) ;
         
-        if(isValidRole(role)){
-            const userNameExistInEmployee = await checkUserNameExistance('employee' , userName) ;
-            const userNameExistInEmployer = await checkUserNameExistance('Employer' , userName) ;
-            if(userNameExistInEmployee || userNameExistInEmployer){
-                throw new Error("user name exist ")
-            }else {
-                const payload = {
-                    userName : userName , 
-                    role
-                }
-                let token =  attachCookiesToResponse(res,payload) ;
-                res.setHeader('Authorization', `Bearer ${token}`)
-                res.status(200).json(responseBody("success" , "valid user name" , 200 , {userName})) ;
+        const userNameExistInEmployee = await checkUserNameExistance('employee' , userName) ;
+        const userNameExistInEmployer = await checkUserNameExistance('Employer' , userName) ;
+        if(userNameExistInEmployee || userNameExistInEmployer){
+            throw new Error("user name already exist ")
+        }else {
+            const payload = {
+                userName : userName , 
+                role
             }
+            let token =  attachCookiesToResponse(res,payload) ;
+            res.setHeader('Authorization', `Bearer ${token}`)
+            res.status(200).json(responseBody("success" , "valid user name" , 200 , {userName})) ;
         }
-        else {
-            throw new Error("enter valid role") ;
-        }
+        
     }catch(e){
         res.status(400).json(responseBody("failed" , e.message , 400 , {userName})) ;
     }
@@ -46,11 +42,8 @@ const checkUserNameExistance = async(role , userName)=>{
 const roleSelection = (role)=>{
     if(role === "dev" || role==="worker")role="employee" ;
     else if(role==="emp")role="Employer" ;
+    else throw new Error("invalid role") ;
     return role ;
-}
-
-const isValidRole = (role)=>{
-    return (role === "employee" || role === "Employer") ;
 }
 
 const validUserName = (userName)=>{
@@ -61,5 +54,4 @@ export {
     userNameController , 
     checkUserNameExistance ,
     roleSelection , 
-    isValidRole
 }

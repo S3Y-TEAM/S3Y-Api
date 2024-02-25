@@ -3,9 +3,10 @@ import prisma  from "../db/prisma.js";
 import bcrypt from  "bcrypt"
 import { roleSelection } from "./UserName.js";
 import { responseBody } from "../utils/ResponseBody.js";
+import { isValidEmail } from "./Phone.js";
 const resetPasswordController = async(req,res)=>{
     try{
-        const {newPassword , confirmPassword } = req.body ;
+        const {newPassword , confirmPassword  , email} = req.body ;
         let {role} = req.headers ;
         role = roleSelection(role) ;
         let password = newPassword;
@@ -17,15 +18,10 @@ const resetPasswordController = async(req,res)=>{
 
         let token = req.headers.authorization.split(' ')[1] ;
         const decodedToken = isTokenValid(token);
+        isValidEmail(decodedToken.email , email);
         if(decodedToken){
             const email = decodedToken.email ;
             await updatePassword(role , email , password) ;
-            // remove cookie
-            res.cookie("token", "logout", {
-                httpOnly: true,
-                expires: new Date(Date.now()),
-            });
-            
             res.status(201).json(responseBody("success" , "password updated successfully" , 201 , null));
         }else {
             throw new Error("you are not allowed to access this route!!") 

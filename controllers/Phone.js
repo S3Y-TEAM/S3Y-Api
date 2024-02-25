@@ -3,6 +3,7 @@ import { isTokenValid } from "../utils/jwt.js";
 import { attachCookiesToResponse } from "../utils/jwt.js";
 import { roleSelection } from "./UserName.js";
 import { responseBody } from "../utils/ResponseBody.js";
+import { isValidUserName } from "./Email.js";
 const phoneController = async(req,res)=>{
     try{
         const {phone } = req.body ;
@@ -10,7 +11,8 @@ const phoneController = async(req,res)=>{
         role = roleSelection(role) ;
         let token = req.headers.authorization.split(' ')[1] ;
         const decodedToken = isTokenValid(token);
-    
+        isValidUserName(decodedToken.userName , req.body.userName) ;
+        isValidEmail(decodedToken.email ,req.body.email) ;
         if(decodedToken){
             const phoneExist = await checkPhoneExistance(role , phone) ;
             if(phoneExist){
@@ -44,6 +46,12 @@ const checkPhoneExistance = async(role , phone)=>{
     return (phoneExist!=null) ;
 }
 
+const isValidEmail = (emailOfToken , emailOfBody)=>{
+    if(emailOfBody===emailOfToken)return 1;
+    else throw new Error('You are not allowed to access this page !!!!') ;
+}
+
 export {
-    phoneController
+    phoneController ,
+    isValidEmail
 }
