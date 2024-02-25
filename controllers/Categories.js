@@ -6,6 +6,9 @@ const categoriesController = async(req,res)=>{
     try{
         const clientToken = req.headers.authorization.split(' ')[1] ;
         let token = req.signedCookies.token;
+        if(!token){
+            throw new Error ('Lsa Error ????') ;
+        }
         const decodedToken = isTokenValid({ token });
         let {role} = req.headers ;
         const specialization = role ;
