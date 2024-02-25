@@ -4,16 +4,12 @@ import {roleSelection} from './UserName.js'
 import { responseBody } from "../utils/ResponseBody.js";
 const categoriesController = async(req,res)=>{
     try{
-        const clientToken = req.headers.authorization.split(' ')[1] ;
-        let token = req.signedCookies.token;
-        if(!token){
-            throw new Error ('Lsa Error ????') ;
-        }
-        const decodedToken = isTokenValid({ token });
+        const token = req.headers.authorization.split(' ')[1] ;
+        const decodedToken = isTokenValid(token );
         let {role} = req.headers ;
         const specialization = role ;
         role = roleSelection(role) ;
-        if(clientToken===token){
+        if(decodedToken){
             const categoriesList = await findCategories(specialization) ;
             res.setHeader('Authorization', `Bearer ${token}`)
             res.status(200).json(responseBody("success" , `categories of ${specialization}` , 200 , categoriesList)) ;

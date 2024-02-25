@@ -8,11 +8,10 @@ const phoneController = async(req,res)=>{
         const {phone } = req.body ;
         let {role} = req.headers ;
         role = roleSelection(role) ;
-        let token = req.signedCookies.token;
-        const decodedToken = isTokenValid({ token });
-        
-        const clientToken = req.headers.authorization.split(' ')[1] ;
-        if(clientToken === token){
+        let token = req.headers.authorization.split(' ')[1] ;
+        const decodedToken = isTokenValid(token);
+    
+        if(decodedToken){
             const phoneExist = await checkPhoneExistance(role , phone) ;
             if(phoneExist){
                 throw new Error("this phone already exist")

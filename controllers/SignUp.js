@@ -12,8 +12,8 @@ const signUpController = async(req,res)=>{
     role = roleSelection(role) ;
     try{
         //authorization 
-        let token = req.signedCookies.token;
-        const decodedToken = isTokenValid({ token });
+        let token = req.headers.authorization.split(' ')[1] ;
+        const decodedToken = isTokenValid(token);
         const {Email , user_name , National_id ,Phone_number} = req.body ;
         await isValidNationalId(National_id,role) ;
         
@@ -21,9 +21,8 @@ const signUpController = async(req,res)=>{
         isSameEmail(decodedToken.email ,Email)
         isSameUserName(decodedToken.userName , user_name) ;
     
-        const clientToken = req.headers.authorization.split(' ')[1] ;
         // phone or email because phone page may be skipped
-        if(token === clientToken){
+        if(decodedToken){
             const workFactor = 10;
             let password = req.body.Password;
              

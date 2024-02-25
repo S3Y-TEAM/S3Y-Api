@@ -5,7 +5,7 @@ import { roleSelection } from "./UserName.js";
 import { responseBody } from "../utils/ResponseBody.js";
 const resetPasswordController = async(req,res)=>{
     try{
-        const {newPassword , confirmPassword ,email} = req.body ;
+        const {newPassword , confirmPassword } = req.body ;
         let {role} = req.headers ;
         role = roleSelection(role) ;
         let password = newPassword;
@@ -15,10 +15,10 @@ const resetPasswordController = async(req,res)=>{
             throw new Error("password not match !!") ;
         }
 
-        let token = req.signedCookies.token;
-        const decodedToken = isTokenValid({ token });
-        const clientToken = req.headers.authorization.split(' ')[1] ;
-        if(token === clientToken){
+        let token = req.headers.authorization.split(' ')[1] ;
+        const decodedToken = isTokenValid(token);
+        if(decodedToken){
+            const email = decodedToken.email ;
             await updatePassword(role , email , password) ;
             // remove cookie
             res.cookie("token", "logout", {

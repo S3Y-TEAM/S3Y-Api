@@ -5,12 +5,13 @@ import {roleSelection} from './UserName.js'
 import { responseBody } from "../utils/ResponseBody.js";
 const emailController = async(req,res)=>{
     try{
-        let token = req.signedCookies.token;
-        const clientToken = req.headers.authorization.split(' ')[1] ;
-        const decodedToken = isTokenValid({ token });
+        
+        let token = req.headers.authorization.split(' ')[1] ;
+        const decodedToken = isTokenValid(token);
         let {role} = req.headers ;
         role = roleSelection(role) ;
-        if(clientToken === token){
+        
+        if(decodedToken){
             const {email} = req.body ;
             if(isValidRole(role)){
                 const emailExist = await checkEmailExistance(role , email) ;

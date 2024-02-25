@@ -6,14 +6,13 @@ import { roleSelection } from "./UserName.js";
 import { responseBody } from "../utils/ResponseBody.js";
 const emailOtpController = async(req,res)=>{
   try{
-    let token = req.signedCookies.token;
-    const decodedToken = isTokenValid({ token });
-    const clientToken = req.headers.authorization.split(' ')[1] ;
+    let token = req.headers.authorization.split(' ')[1] ;
+    const decodedToken = isTokenValid(token); 
     let {role} = req.headers ;
     role = roleSelection(role) ;
     const email = decodedToken.email ;
     
-    if(clientToken===token){
+    if(decodedToken){
       let codeNumber = await generateCode(5);
       const messageBody = 
   

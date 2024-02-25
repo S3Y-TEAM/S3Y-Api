@@ -9,11 +9,10 @@ const passwordOtpController = async(req,res)=>{
         
         let {role} = req.headers ;
         role = roleSelection(role) ;
-        let token = req.signedCookies.token;
-        const clientToken = req.headers.authorization.split(' ')[1] ;
-        const decodedToken = isTokenValid({token}) ;
+        let token = req.headers.authorization.split(' ')[1] ;
+        const decodedToken = isTokenValid(token) ;
         let email = decodedToken.email ;
-        if(clientToken === token){
+        if(decodedToken){
             const codeNumber = await generateCode(5) ;
             const messageBody = 
             `
