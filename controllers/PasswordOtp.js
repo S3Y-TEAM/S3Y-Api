@@ -15,7 +15,12 @@ const passwordOtpController = async(req,res)=>{
         let email = decodedToken.email ;
         if(clientToken === token){
             const codeNumber = await generateCode(5) ;
-            const emailSent = await sendEmail(email , codeNumber) ;
+            const messageBody = 
+            `
+            Dear ${email.split('@')[0]},
+            Your verification code for password reset is: ${codeNumber}.\nPlease enter this code on the verification page\nto complete the process.\nThank you,\nS3y Team
+            `
+            const emailSent = await sendEmail(email , messageBody) ;
             const payload = {
                 email :  email ,
                 role , 

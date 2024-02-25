@@ -15,7 +15,11 @@ const emailOtpController = async(req,res)=>{
     
     if(clientToken===token){
       let codeNumber = await generateCode(5);
-      await sendEmail(email,codeNumber) ;
+      const messageBody = 
+  
+      `Dear ${email.split('@')[0]},\nYour verification code for email verification is: ${codeNumber}.\nPlease enter this code on the verification page\nto complete the process.\nThank you,\nS3y Team`
+      
+      await sendEmail(email,messageBody) ;
       const payload = {
           email :  email , 
           role ,
