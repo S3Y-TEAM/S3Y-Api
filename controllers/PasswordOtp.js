@@ -6,12 +6,13 @@ import { roleSelection } from "./UserName.js";
 import { responseBody } from "../utils/ResponseBody.js";
 const passwordOtpController = async(req,res)=>{
     try{
-        const {email} = req.body ;
+        
         let {role} = req.headers ;
         role = roleSelection(role) ;
         let token = req.signedCookies.token;
         const clientToken = req.headers.authorization.split(' ')[1] ;
         const decodedToken = isTokenValid({token}) ;
+        let email = decodedToken.email ;
         if(clientToken === token){
             const codeNumber = await generateCode(5) ;
             const emailSent = await sendEmail(email , codeNumber) ;
