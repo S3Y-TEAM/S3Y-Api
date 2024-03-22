@@ -8,7 +8,7 @@ datasource db {
 }
 
 model Employer {
-  emp_id       Int        @id @unique(map: "emp_id_UNIQUE") @default(autoincrement())
+  id           Int        @id @unique(map: "id_UNIQUE") @default(autoincrement())
   Fname        String     @db.VarChar(45)
   Lname        String     @db.VarChar(45)
   Email        String     @unique(map: "Email_UNIQUE") @db.VarChar(45)
@@ -38,8 +38,8 @@ model Links {
 
 model Payments {
   id           Int      @id @unique(map: "id_UNIQUE") @default(autoincrement())
-  status       Int
-  Total_amount Int
+  status       Int      @default(0)
+  Total_amount Int      @default(0)
   date         DateTime @db.DateTime(0)
   Tasks        Tasks[]
 }
@@ -48,25 +48,26 @@ model Tasks {
   id                 Int                 @unique(map: "id_UNIQUE") @default(autoincrement())
   Title              String              @db.VarChar(45)
   Descr              String              @db.VarChar(200)
-  status             String              @db.VarChar(45)
-  posting_date       DateTime            @db.DateTime(0)
+  status             String              @default("Not Started") @db.VarChar(45)
+  posting_date       DateTime            @default(now()) @db.DateTime(0)
   deadline           DateTime            @db.DateTime(0)
   Address            String              @db.VarChar(45)
   price              Decimal?            @db.Decimal(10, 0)
   img                Bytes?
   note               String?             @db.VarChar(100)
-  Employer_emp_id    Int
+  Employer_id        Int
   category_id        Int
-  Payments_id        Int
-  reviews_id         Int
-  Employer           Employer            @relation(fields: [Employer_emp_id], references: [emp_id], onDelete: Cascade, onUpdate: Cascade, map: "fk_Tasks_Employer1")
-  Payments           Payments            @relation(fields: [Payments_id], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "fk_Tasks_Payments1")
+  Payments_id        Int?
+  reviews_id         Int?
+  Employer           Employer            @relation(fields: [Employer_id], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "fk_Tasks_Employer1")
+  Payments           Payments?           @relation(fields: [Payments_id], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "fk_Tasks_Payments1")
   category           category            @relation(fields: [category_id], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "fk_Tasks_category1")
-  reviews            reviews             @relation(fields: [reviews_id], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "fk_Tasks_reviews1")
+  reviews            reviews?            @relation(fields: [reviews_id], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "fk_Tasks_reviews1")
   Tasks_has_employee Tasks_has_employee?
+  applicants         Application[]
 
-  @@id([id, Employer_emp_id, category_id, Payments_id, reviews_id])
-  @@index([Employer_emp_id], map: "fk_Tasks_Employer1_idx")
+  @@id([id, Employer_id, category_id])
+  @@index([Employer_id], map: "fk_Tasks_Employer1_idx")
   @@index([Payments_id], map: "fk_Tasks_Payments1_idx")
   @@index([category_id], map: "fk_Tasks_category1_idx")
   @@index([reviews_id], map: "fk_Tasks_reviews1_idx")
@@ -86,7 +87,7 @@ model Tasks_has_employee {
 model category {
   name                  String                @db.VarChar(45)
   id                    Int                   @id @unique(map: "id_UNIQUE") @default(autoincrement())
-  parent                String                @db.VarChar(45)
+  parent                String?               @db.VarChar(45)
   employee_has_category EmployeeHasCategory[]
   Tasks                 Tasks[]
 }
@@ -121,6 +122,7 @@ model employee {
   certficates           certficates[]
   messages              messages[]
   problems              problems[]
+  applications          Application[]
 }
 
 model EmployeeHasCategory {
@@ -135,31 +137,31 @@ model EmployeeHasCategory {
 }
 
 model messages {
-  id              Int      @unique(map: "id_UNIQUE")
-  text            String   @db.VarChar(1000)
-  img             Bytes?
-  Date            DateTime @db.DateTime(0)
-  employee_id     Int
-  Employer_emp_id Int
-  Employer        Employer @relation(fields: [Employer_emp_id], references: [emp_id], onDelete: Cascade, onUpdate: Cascade, map: "fk_messages_Employer1")
-  employee        employee @relation(fields: [employee_id], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "fk_messages_employee1")
+  id          Int      @unique(map: "id_UNIQUE")
+  text        String   @db.VarChar(1000)
+  img         Bytes?
+  Date        DateTime @db.DateTime(0)
+  employee_id Int
+  Employer_id Int
+  Employer    Employer @relation(fields: [Employer_id], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "fk_messages_Employer1")
+  employee    employee @relation(fields: [employee_id], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "fk_messages_employee1")
 
-  @@id([id, employee_id, Employer_emp_id])
-  @@index([Employer_emp_id], map: "fk_messages_Employer1_idx")
+  @@id([id, employee_id, Employer_id])
+  @@index([Employer_id], map: "fk_messages_Employer1_idx")
   @@index([employee_id], map: "fk_messages_employee1_idx")
 }
 
 model problems {
-  id              Int      @unique(map: "id_UNIQUE")
-  text            String   @db.VarChar(45)
-  img             Bytes
-  Employer_emp_id Int
-  employee_id     Int
-  Employer        Employer @relation(fields: [Employer_emp_id], references: [emp_id], onDelete: Cascade, onUpdate: Cascade, map: "fk_problems_Employer1")
-  employee        employee @relation(fields: [employee_id], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "fk_problems_employee1")
+  id          Int      @unique(map: "id_UNIQUE")
+  text        String   @db.VarChar(45)
+  img         Bytes
+  Employer_id Int
+  employee_id Int
+  Employer    Employer @relation(fields: [Employer_id], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "fk_problems_Employer1")
+  employee    employee @relation(fields: [employee_id], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "fk_problems_employee1")
 
-  @@id([id, Employer_emp_id, employee_id])
-  @@index([Employer_emp_id], map: "fk_problems_Employer1_idx")
+  @@id([id, Employer_id, employee_id])
+  @@index([Employer_id], map: "fk_problems_Employer1_idx")
   @@index([employee_id], map: "fk_problems_employee1_idx")
 }
 
@@ -169,4 +171,18 @@ model reviews {
   img    Bytes?
   rating Decimal @db.Decimal(10, 0)
   Tasks  Tasks[]
+}
+
+model Application {
+  id             Int      @id @default(autoincrement())
+  task           Tasks    @relation(fields: [taskId], references: [id])
+  taskId         Int
+  employee       employee @relation(fields: [employeeId], references: [id])
+  employeeId     Int
+  coverLetter    String?
+  similarProject String?
+  expectedBudget Float?
+  deadline       DateTime
+  note           String?
+  accepted       Boolean? @default(false)
 }
