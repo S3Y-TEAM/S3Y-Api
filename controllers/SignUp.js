@@ -9,33 +9,78 @@ import { encryptPasswords } from './ResetPassword.js';
 import { responseBody } from '../utils/ResponseBody.js';
 import { isValidEmail } from './Phone.js';
 import { isValidUserName } from './Email.js';
+import { uploadFile } from './ImagesComparison.js';
+
 const signUpController = async(req,res)=>{
-    let {role} = req.headers ;
-    role = roleSelection(role) ;
+    
     try{
-        //authorization 
+
+        let {role} = req.headers ;
+        role = roleSelection(role) ;
+
+        if(role ==="employee"){
+        req.body.Links = JSON.parse(req.body.Links);
+        req.body.categories = JSON.parse(req.body.categories);
+        req.body.projects = JSON.parse(req.body.projects);
+        }
+        
+        
+
         let token = req.headers.authorization.split(' ')[1] ;
         const decodedToken = isTokenValid(token);
-        const {Email , user_name , National_id ,Phone_number} = req.body ;
-        await isValidNationalId(National_id,role) ;
-        
+        let {Email , user_name  ,Phone_number} = req.body ;
+
+        if(role === "employee"){
+            National_id = req.body.National_id ;
+            await isValidNationalId(National_id,role) ;
+        }
+
         isValidPhone(decodedToken.phone ,Phone_number) ;
         isValidEmail(decodedToken.email ,Email)
         isValidUserName(decodedToken.userName , user_name) ;
     
-        // phone or email because phone page may be skipped
         if(decodedToken){
+            
+            
             const workFactor = 10;
             let password = req.body.Password;
              
             // hashing password 
-            password = await encryptPasswords(password) ;
+            password = await encryptPasswords(password , workFactor) ;
+            
             req.body.Password = password ;
+            
+            // for employee only !
+            if(role === "employee"){
+                let certificatesField ;
+                let projectsField ;
+                
+                certificatesField = await getFieldOf(req.files , 'certificates') ;
+                projectsField = await getFieldOf(req.files , 'projects');
+                
+            
+                req.body.certificates = await getFileFromResponse(certificatesField,  'amr') ;
+                let projectsPaths =  await getFileFromResponse(projectsField,  'amr') ;
+            
+                let projectsList = [] ;
+                let indexOfProjectPaths = 0 ;
+
+                for(let project of req.body.projects){
+                    project.path =  projectsPaths[indexOfProjectPaths].path ;
+                    projectsList.push(project) ;
+                    indexOfProjectPaths++;
+                }
+                req.body.projects = projectsList ;
+            }
+            //
+
+
             const values = req.body ;
             let user = await insertValues(values , role) ;
             delete user.Password ;
             const payload = user ;
-            //console.log(payload) ;
+            
+
             token = attachCookiesToResponse(res,payload) ;
             res.setHeader('Authorization', `Bearer ${token}`)
             res.status(201).json(responseBody("success" , "successfully registered" , 201 , {user})) ;
@@ -47,6 +92,8 @@ const signUpController = async(req,res)=>{
         res.status(400).json(responseBody("failed" , e.message , 400 , null)) ;
     }
 }
+
+
 
 const insertValues = async(values , role)=>{
     try{
@@ -60,17 +107,22 @@ const insertValues = async(values , role)=>{
                         Email : values.Email , 
                         Password :values.Password ,
                         Phone_number : values.Phone_number ,
-                        Personal_image : values.Personal_image ,
+                        Personal_image :  "0xop" ,
+                        National_image : "0xtp",
                         country : values.country , 
                         city : values.city , 
                         Address : values.Address , 
                         user_name : values.user_name , 
+                        experience : values.experience ,
                         verified : 1 , 
                         Links : {
                             create : values.Links 
                         }    , 
-                        certficates : {
-                            create : values.certficates
+                        certificates : {
+                            create : values.certificates
+                        } ,
+                        projects : {
+                            create : values.projects
                         } ,
                         employee_has_category : {
                             create : values.categories
@@ -125,9 +177,35 @@ const isValidPhone = (phoneFromToken , phoneFromBody)=>{
 }
 
 
+
+const getFileFromResponse = async(fieldList , userName)=>{
+    let fieldsNumber = 0 ;
+    let listOfFilesPaths =  [] ;
+    for(let fileObj of fieldList){
+            let pathValue = fileObj.path ;
+            let extensionType = fileObj.mimetype.split('/').pop()
+            let fieldName = fileObj.fieldname ;
+            const dropboxPath = `/${userName}/${fieldName}/${fieldsNumber}.${extensionType}` ;
+            listOfFilesPaths.push({path : dropboxPath});
+            fieldsNumber++;
+            await uploadFile(pathValue , dropboxPath) ;
+    }
+    return listOfFilesPaths ;
+}
+
+const getFieldOf = async(files , fieldName)=>{
+    let listOfFields = [] ;
+    for(let fieldObj of files){
+        if(fieldObj.fieldname === fieldName)listOfFields.push(fieldObj) ;
+    }
+    return listOfFields ;
+}
+
 export {
     signUpController ,
-    isValidPhone
+    isValidPhone ,
+    getFileFromResponse ,
+    getFieldOf
 }
 
 

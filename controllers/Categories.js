@@ -11,6 +11,7 @@ const categoriesController = async(req,res)=>{
         let {role} = req.headers ;
         const specialization = role ;
         role = roleSelection(role) ;
+        // check for userName !!!!!!!!!!!!!!!!!!!1
         isValidRole(role) ;
         if(decodedToken){
             const categoriesList = await findCategories(specialization) ;

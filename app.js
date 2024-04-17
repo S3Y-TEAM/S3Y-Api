@@ -8,10 +8,13 @@ import {signInRoute} from './routes/SignIn.js'
 import {forgetPasswordRoute} from './routes/ForgetPassword.js'
 import {resetPasswordRoute} from './routes/ResetPassword.js'
 import {logOutRoute} from "./routes/LogOut.js"
+import {imagesComparisonRoute} from './routes/ImagesComparison.js'
 import cookieParser from 'cookie-parser';
 import { rateLimit } from 'express-rate-limit'
 import cors from  'cors' ;
+
 const app = express() ;
+
 
 app.use(cors({
     exposedHeaders: ['Content-Length', 'Content-Type', 'Authorization'],
@@ -37,6 +40,11 @@ app.use('/api/v1' , signInRoute) ;
 app.use('/api/v1' , forgetPasswordRoute) ;
 app.use('/api/v1' , resetPasswordRoute) ;
 app.use('/api/v1' , logOutRoute) ;
+app.use('/api/v1' , imagesComparisonRoute) ;
+
+
+
+
 
 // limiter 
 const limiter = rateLimit({
@@ -47,28 +55,10 @@ const limiter = rateLimit({
 })
 
 app.use(limiter)
+
 app.listen(PORT , ()=> {
     console.log(`app is listening on port ${PORT}`) ;
 }
 )
 
 
-
-/**
- * 
- * 
- * certficates / projects
- * id , name ,  descr , link (project) ;
- * id , name ,  pdf (certficate) 
- * 
- * user name unique over all usernames
- */
-
-
-
-/***
- * 
- * categories ---> Get
- * 
- * 
- */

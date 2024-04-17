@@ -5,7 +5,10 @@ generator client {
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
+  
 }
+
+
 
 model Employer {
   emp_id       Int        @id @unique(map: "emp_id_UNIQUE") @default(autoincrement())
@@ -91,14 +94,27 @@ model category {
   Tasks                 Tasks[]
 }
 
-model certficates {
+model certificates {
   id          Int      @unique(map: "id_UNIQUE") @default(autoincrement())
-  name        String   @db.VarChar(45)
+  path        String   @db.VarChar(200)
   employee_id Int
-  employee    employee @relation(fields: [employee_id], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "fk_certficates_employee1")
+  employee    employee @relation(fields: [employee_id], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "fk_certificates_employee1")
 
   @@id([id, employee_id])
-  @@index([employee_id], map: "fk_certficates_employee1_idx")
+  @@index([employee_id], map: "fk_certificates_employee1_idx")
+}
+
+model projects {
+  id          Int      @unique(map: "id_UNIQUE") @default(autoincrement())
+  path        String   @db.VarChar(200)
+  name        String   @db.VarChar(200)
+  type        String   @db.VarChar(200)
+  description String   @db.VarChar(200)
+  employee_id Int
+  employee    employee @relation(fields: [employee_id], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "fk_projects_employee1")
+
+  @@id([id, employee_id])
+  @@index([employee_id], map: "fk_projects_employee1_idx")
 }
 
 model employee {
@@ -109,16 +125,19 @@ model employee {
   Email                 String                @unique(map: "Email_UNIQUE") @db.VarChar(45)
   Password              String                @db.VarChar(200)
   Phone_number          String                @db.VarChar(45)
-  Personal_image        String                @db.VarChar(45)
+  Personal_image        String                @db.VarChar(200)
+  National_image        String                @db.VarChar(200)
   country               String                @db.VarChar(45)
   city                  String                @db.VarChar(45)
   Address               String                @db.VarChar(45)
   user_name             String                @unique(map: "user_name_UNIQUE") @db.VarChar(45)
   verified              Int
+  experience            String                @db.VarChar(45)
   employee_has_category EmployeeHasCategory[]
   Links                 Links[]
   Tasks_has_employee    Tasks_has_employee?
-  certficates           certficates[]
+  certificates          certificates[]
+  projects              projects[]
   messages              messages[]
   problems              problems[]
 }
@@ -126,12 +145,10 @@ model employee {
 model EmployeeHasCategory {
   employee_id Int
   category_id Int
-  category    category @relation(fields: [category_id], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "fk_employee_has_category_category1")
-  employee    employee @relation(fields: [employee_id], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "fk_employee_has_category_employee1")
+  category    category @relation(fields: [category_id], references: [id])
+  employee    employee @relation(fields: [employee_id], references: [id])
 
   @@id([employee_id, category_id])
-  @@index([category_id], map: "fk_employee_has_category_category1_idx")
-  @@index([employee_id], map: "fk_employee_has_category_employee1_idx")
 }
 
 model messages {
