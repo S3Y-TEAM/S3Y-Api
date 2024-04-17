@@ -6,7 +6,7 @@ import { responseBody } from "../utils/ResponseBody.js";
 import {generateCode} from  '../utils/GenerateCdoe.js'
 import {sendEmail} from '../utils/SendMail.js'
 const emailController = async(req,res)=>{
-    console.log(process.env.JWT_SECRET) ;
+    
     try{
         
         let token = req.headers.authorization.split(' ')[1] ;
