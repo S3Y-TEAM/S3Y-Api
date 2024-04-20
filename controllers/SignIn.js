@@ -40,7 +40,7 @@ const getUser = async (role, email) => {
         Email: email,
       },
     });
-    console.log(user, role, email);
+    
     return user;
   } catch (e) {
     console.log(e);

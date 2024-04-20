@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
   
 }
@@ -11,24 +11,24 @@ datasource db {
 
 
 model Employer {
-  id           Int        @id @unique(map: "id_UNIQUE") @default(autoincrement())
+  id           Int        @id @unique @default(autoincrement())
   Fname        String     @db.VarChar(45)
   Lname        String     @db.VarChar(45)
-  Email        String     @unique(map: "Email_UNIQUE") @db.VarChar(45)
+  Email        String     @unique @db.VarChar(45)
   Password     String     @db.VarChar(200)
   Phone_number String     @db.VarChar(45)
   img          String
   country      String     @db.VarChar(45)
   city         String     @db.VarChar(45)
   Address      String     @db.VarChar(60)
-  user_name    String     @unique(map: "user_name_UNIQUE") @db.VarChar(45)
+  user_name    String     @unique @db.VarChar(45)
   Tasks        Tasks[]
   messages     messages[]
   problems     problems[]
 }
 
 model Links {
-  id          Int      @unique(map: "id_UNIQUE") @default(autoincrement())
+  id          Int      @unique @default(autoincrement())
   Linkedin    String?  @db.VarChar(45)
   Github      String?  @db.VarChar(45)
   other       String?  @db.VarChar(45)
@@ -40,20 +40,20 @@ model Links {
 }
 
 model Payments {
-  id           Int      @id @unique(map: "id_UNIQUE") @default(autoincrement())
+  id           Int      @id @unique @default(autoincrement())
   status       Int      @default(0)
   Total_amount Int      @default(0)
-  date         DateTime @db.DateTime(0)
+  date         DateTime 
   Tasks        Tasks[]
 }
 
 model Tasks {
-  id                 Int                 @unique(map: "id_UNIQUE") @default(autoincrement())
+  id                 Int                 @unique @default(autoincrement())
   Title              String              @db.VarChar(45)
   Descr              String              @db.VarChar(200)
   status             String              @default("Not Started") @db.VarChar(45)
-  posting_date       DateTime            @default(now()) @db.DateTime(0)
-  deadline           DateTime            @db.DateTime(0)
+  posting_date       DateTime            
+  deadline           DateTime            
   Address            String              @db.VarChar(45)
   price              Decimal?            @db.Decimal(10, 0)
   img                Bytes?
@@ -77,8 +77,8 @@ model Tasks {
 }
 
 model Tasks_has_employee {
-  Tasks_id    Int      @unique(map: "Tasks_id_UNIQUE")
-  employee_id Int      @unique(map: "employee_id_UNIQUE")
+  Tasks_id    Int      @unique
+  employee_id Int      @unique
   Tasks       Tasks    @relation(fields: [Tasks_id], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "fk_Tasks_has_employee_Tasks")
   employee    employee @relation(fields: [employee_id], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "fk_Tasks_has_employee_employee1")
 
@@ -89,14 +89,14 @@ model Tasks_has_employee {
 
 model category {
   name                  String                @db.VarChar(45)
-  id                    Int                   @id @unique(map: "id_UNIQUE") @default(autoincrement())
+  id                    Int                   @id @unique @default(autoincrement())
   parent                String?               @db.VarChar(45)
   employee_has_category EmployeeHasCategory[]
   Tasks                 Tasks[]
 }
 
 model certificates {
-  id          Int      @unique(map: "id_UNIQUE") @default(autoincrement())
+  id          Int      @unique @default(autoincrement())
   path        String   @db.VarChar(200)
   employee_id Int
   employee    employee @relation(fields: [employee_id], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "fk_certificates_employee1")
@@ -106,7 +106,7 @@ model certificates {
 }
 
 model projects {
-  id          Int      @unique(map: "id_UNIQUE") @default(autoincrement())
+  id          Int      @unique @default(autoincrement())
   path        String   @db.VarChar(200)
   name        String   @db.VarChar(200)
   type        String   @db.VarChar(200)
@@ -119,11 +119,11 @@ model projects {
 }
 
 model employee {
-  id                    Int                   @id @unique(map: "id_UNIQUE") @default(autoincrement())
-  National_id           String                @unique(map: "National_id_UNIQUE") @db.VarChar(45)
+  id                    Int                   @id @unique @default(autoincrement())
+  National_id           String                @unique @db.VarChar(45)
   Fname                 String                @db.VarChar(45)
   Lname                 String                @db.VarChar(45)
-  Email                 String                @unique(map: "Email_UNIQUE") @db.VarChar(45)
+  Email                 String                @unique @db.VarChar(45)
   Password              String                @db.VarChar(200)
   Phone_number          String                @db.VarChar(45)
   Personal_image        String                @db.VarChar(200)
@@ -131,7 +131,7 @@ model employee {
   country               String                @db.VarChar(45)
   city                  String                @db.VarChar(45)
   Address               String                @db.VarChar(45)
-  user_name             String                @unique(map: "user_name_UNIQUE") @db.VarChar(45)
+  user_name             String                @unique @db.VarChar(45)
   verified              Int
   experience            String                @db.VarChar(45)
   employee_has_category EmployeeHasCategory[]
@@ -154,10 +154,10 @@ model EmployeeHasCategory {
 }
 
 model messages {
-  id          Int      @unique(map: "id_UNIQUE")
+  id          Int      @unique
   text        String   @db.VarChar(1000)
   img         Bytes?
-  Date        DateTime @db.DateTime(0)
+  Date        DateTime 
   employee_id Int
   Employer_id Int
   Employer    Employer @relation(fields: [Employer_id], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "fk_messages_Employer1")
@@ -169,7 +169,7 @@ model messages {
 }
 
 model problems {
-  id          Int      @unique(map: "id_UNIQUE")
+  id          Int      @unique
   text        String   @db.VarChar(45)
   img         Bytes
   Employer_id Int
@@ -183,7 +183,7 @@ model problems {
 }
 
 model reviews {
-  id     Int     @id @unique(map: "id_UNIQUE") @default(autoincrement())
+  id     Int     @id @unique @default(autoincrement())
   text   String  @db.VarChar(200)
   img    Bytes?
   rating Decimal @db.Decimal(10, 0)
