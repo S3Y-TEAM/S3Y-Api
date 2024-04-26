@@ -6,6 +6,7 @@ import { attachCookiesToResponse } from "../utils/jwt.js";
 
 const categoriesController = async(req,res)=>{
     try{
+        
         let token = req.headers.authorization.split(' ')[1] ;
         const decodedToken = isTokenValid(token );
         let {role} = req.headers ;
@@ -36,6 +37,8 @@ const isValidRole = (role)=>{
 }
 
 const findCategories = async(role)=>{
+    if(role === "worker")role = "craftsman" ;
+    else if(role === "dev")role = "developer" ;
     const categories = await prisma.category.findMany({
         where : {
             parent : role
@@ -44,6 +47,77 @@ const findCategories = async(role)=>{
     return categories ;
 } 
 
+
+// remove comments when you need to add categories 
+// const addCategories = async()=>{
+//     try{
+//         const categories = [
+//             {
+//                 name : "Software Development" ,
+//                 parent : "developer"
+//             },
+//             {
+//                 name : "Data Science" ,
+//                 parent : "developer"
+//             },
+//             {
+//                 name : "Machine Learning" ,
+//                 parent : "developer"
+//             },
+//             {
+//                 name : "Web Development" ,
+//                 parent : "developer"
+//             },
+//             {
+//                 name : "Mobile Development" ,
+//                 parent : "developer"
+//             },
+//             {
+//                 name : "Game Development" ,
+//                 parent : "developer"
+//             },
+//             {
+//                 name : "Software Testing" ,
+//                 parent : "developer"
+//             },
+//             {
+//                 name : "carpentry" ,
+//                 parent : "craftsman"
+//             },
+//             {
+//                 name : "plumbing" ,
+//                 parent : "craftsman"
+//             },
+//             {
+//                 name : "electricity" ,
+//                 parent : "craftsman"
+//             },
+//             {
+//                 name : "painting" ,
+//                 parent : "craftsman"
+//             },
+//             {
+//                 name : "gardening" ,
+//                 parent : "craftsman"
+//             },
+//             {
+//                 name : "cleaning" ,
+//                 parent : "craftsman"
+//             }
+//         ]
+        
+
+//         categories.forEach(async(category)=>{
+//             await prisma.category.create({
+//                 data : category
+//             })
+//         })
+//     }catch(e){
+//         console.log(e.message) ;
+//     }
+            
+
+// }
 export {
     categoriesController ,
 }

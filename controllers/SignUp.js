@@ -19,9 +19,14 @@ const signUpController = async(req,res)=>{
         role = roleSelection(role) ;
 
         if(role ==="employee"){
-        req.body.Links = JSON.parse(req.body.Links);
-        req.body.categories = JSON.parse(req.body.categories);
-        req.body.projects = JSON.parse(req.body.projects);
+        if(req.body.Links)req.body.Links = JSON.parse(req.body.Links);
+        else req.body.Links = [] ;
+
+        if(req.body.categories)req.body.categories = JSON.parse(req.body.categories);
+        else req.body.categories = [] ;
+        
+        if(req.body.projects)req.body.projects = JSON.parse(req.body.projects);
+        else req.body.projects = [] ;
         }
         
         
@@ -31,7 +36,7 @@ const signUpController = async(req,res)=>{
         let {Email , user_name  ,Phone_number} = req.body ;
 
         if(role === "employee"){
-            National_id = req.body.National_id ;
+            let National_id = req.body.National_id ;
             await isValidNationalId(National_id,role) ;
         }
 
@@ -64,11 +69,12 @@ const signUpController = async(req,res)=>{
             
                 let projectsList = [] ;
                 let indexOfProjectPaths = 0 ;
-
-                for(let project of req.body.projects){
-                    project.path =  projectsPaths[indexOfProjectPaths].path ;
-                    projectsList.push(project) ;
-                    indexOfProjectPaths++;
+                if(projectsPaths.length !== 0){
+                    for(let project of req.body.projects){
+                        project.path =  projectsPaths[indexOfProjectPaths].path ;
+                        projectsList.push(project) ;
+                        indexOfProjectPaths++;
+                    }
                 }
                 req.body.projects = projectsList ;
             }
@@ -96,6 +102,7 @@ const signUpController = async(req,res)=>{
 
 
 const insertValues = async(values , role)=>{
+    
     try{
         if(role === "employee"){
             
@@ -181,6 +188,7 @@ const isValidPhone = (phoneFromToken , phoneFromBody)=>{
 const getFileFromResponse = async(fieldList , userName)=>{
     let fieldsNumber = 0 ;
     let listOfFilesPaths =  [] ;
+    if(!fieldList)return [] ;
     for(let fileObj of fieldList){
             let pathValue = fileObj.path ;
             let extensionType = fileObj.mimetype.split('/').pop()
@@ -195,6 +203,7 @@ const getFileFromResponse = async(fieldList , userName)=>{
 
 const getFieldOf = async(files , fieldName)=>{
     let listOfFields = [] ;
+    if(!files)return [] ;
     for(let fieldObj of files){
         if(fieldObj.fieldname === fieldName)listOfFields.push(fieldObj) ;
     }
