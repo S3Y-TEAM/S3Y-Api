@@ -8,6 +8,7 @@ const createTask = async (req, res) => {
     description,
     category,
     employerId,
+    posting_date,
     deadline,
     address,
     price,
@@ -54,6 +55,7 @@ const createTask = async (req, res) => {
       data: {
         Title: title,
         Descr: description,
+        posting_date: new Date(posting_date),
         deadline: new Date(deadline),
         Address: address,
         price: parseFloat(price),
