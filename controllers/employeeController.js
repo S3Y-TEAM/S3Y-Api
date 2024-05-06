@@ -1,3 +1,4 @@
+import { application } from "express";
 import prisma from "../db/prisma.js";
 import { responseBody } from "../utils/ResponseBody.js";
 
@@ -82,7 +83,11 @@ const getEmpAppliedJobs = async (req, res) => {
         task: {
           include: {
             category: true,
-            applicants: true,
+            applicants: {
+              where: {
+                employeeId: parseInt(employeeId),
+              },
+            },
           },
         },
       },

@@ -24,9 +24,7 @@ const requireAuth = async (req, res, next) => {
     role = roleSelection(role);
     console.log(role, decodedToken, decodedToken.email);
     const u = await getUser(role, decodedToken.email);
-    console.log(u);
     req.user = u;
-    console.log(req.user);
 
     next();
   } catch (error) {
