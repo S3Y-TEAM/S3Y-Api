@@ -14,6 +14,8 @@ import { employerRoute } from "./routes/employerRoute.js";
 import { chatRoute } from "./routes/chatRoute.js";
 import { messageRoute } from "./routes/messageRoute.js";
 import { userRoute } from "./routes/userRoute.js";
+import {paymentRoute} from './routes/payment.js' ;
+
 import cookieParser from "cookie-parser";
 import { rateLimit } from "express-rate-limit";
 import cors from "cors";
@@ -47,12 +49,14 @@ app.use("/api/v1", signInRoute);
 app.use("/api/v1", forgetPasswordRoute);
 app.use("/api/v1", resetPasswordRoute);
 app.use("/api/v1", logOutRoute);
+app.use("/api/v1",paymentRoute) ;
 app.use("/api/v1/tasks", taskRoute);
 app.use("/api/v1/employee", employeeRoute);
 app.use("/api/v1/employer", employerRoute);
 app.use("/api/v1/chats", chatRoute);
 app.use("/api/v1/messages", messageRoute);
 app.use("/api/v1/user", userRoute);
+
 
 // limiter
 const limiter = rateLimit({
