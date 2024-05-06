@@ -10,8 +10,10 @@ const createTask = async (req, res) => {
     employerId,
     posting_date,
     deadline,
+    country,
+    city,
     address,
-    price,
+    price_range,
     note,
   } = req.body;
   const image = req.file;
@@ -57,8 +59,10 @@ const createTask = async (req, res) => {
         Descr: description,
         posting_date: new Date(posting_date),
         deadline: new Date(deadline),
+        country,
+        city,
         Address: address,
-        price: parseFloat(price),
+        price_range,
         img: image ? image.path : null,
         note,
         category: { connect: { id: foundCategory.id } },
@@ -126,7 +130,7 @@ const applyForTask = async (req, res) => {
     expectedBudget,
   } = req.body;
 
-  if (!employeeId || !taskId) {
+  if (!employeeId || !taskId || !expectedBudget) {
     return res
       .status(400)
       .json(responseBody("failed", "Missing parameters", 400, null));
@@ -185,7 +189,7 @@ const applyForTask = async (req, res) => {
         deadline: new Date(deadline),
         similarProject,
         note,
-        expectedBudget: parseFloat(expectedBudget) || parseFloat(task.price),
+        expectedBudget: parseFloat(expectedBudget),
       },
     });
 
@@ -309,6 +313,9 @@ const listApplications = async (req, res) => {
     const applications = await prisma.application.findMany({
       where: {
         taskId: parseInt(taskId),
+      },
+      include: {
+        employee: true,
       },
     });
     if (!applications) {
