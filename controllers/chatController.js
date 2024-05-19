@@ -58,18 +58,16 @@ export const createChat = async (req, res) => {
     const newchat = await Chat.create({
       members: [employerId, employeeId],
     });
-    return res
-      .status(201)
-      .json(
-        responseBody("success", "chat created successfully", 201, {
-          chat: newchat,
-        })
-      );
+    return res.status(201).json(
+      responseBody("success", "chat created successfully", 201, {
+        chat: newchat,
+      })
+    );
   } catch (err) {
     console.log(err);
     return res
       .status(500)
-      .json(responseBody("failed", "Internal server error", 500, null));
+      .json(responseBody("failed", "Internal server error", 500, err));
   }
 };
 
