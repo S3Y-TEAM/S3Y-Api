@@ -1,5 +1,6 @@
 import Chat from "../chatModels/chatModel.js";
 import { responseBody } from "../utils/ResponseBody.js";
+import prisma from "../db/prisma.js";
 
 export const createChat = async (req, res) => {
   const { id } = req.user;
