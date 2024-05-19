@@ -65,9 +65,7 @@ export const createChat = async (req, res) => {
     );
   } catch (err) {
     console.log(err);
-    return res
-      .status(500)
-      .json(responseBody("failed", "Internal server error", 500, err));
+    return res.status(500).json(responseBody("failed", err.message, 500, null));
   }
 };
 
