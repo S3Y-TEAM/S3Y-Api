@@ -77,9 +77,7 @@ const createTask = async (req, res) => {
       );
   } catch (error) {
     console.error("Error creating task:", error);
-    res
-      .status(500)
-      .json(responseBody("failed", "Internal server error", 500, null));
+    res.status(500).json(responseBody("failed", error.message, 500, null));
   }
 };
 
