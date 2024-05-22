@@ -14,8 +14,9 @@ import { employerRoute } from "./routes/employerRoute.js";
 import { chatRoute } from "./routes/chatRoute.js";
 import { messageRoute } from "./routes/messageRoute.js";
 import { userRoute } from "./routes/userRoute.js";
-import {paymentRoute} from './routes/payment.js' ;
-
+import { paymentRoute } from "./routes/payment.js";
+import { createServer } from "http";
+import { Server } from "socket.io";
 import cookieParser from "cookie-parser";
 import { rateLimit } from "express-rate-limit";
 import cors from "cors";
@@ -49,14 +50,13 @@ app.use("/api/v1", signInRoute);
 app.use("/api/v1", forgetPasswordRoute);
 app.use("/api/v1", resetPasswordRoute);
 app.use("/api/v1", logOutRoute);
-app.use("/api/v1",paymentRoute) ;
+app.use("/api/v1", paymentRoute);
 app.use("/api/v1/tasks", taskRoute);
 app.use("/api/v1/employee", employeeRoute);
 app.use("/api/v1/employer", employerRoute);
 app.use("/api/v1/chats", chatRoute);
 app.use("/api/v1/messages", messageRoute);
 app.use("/api/v1/user", userRoute);
-
 
 // limiter
 const limiter = rateLimit({
@@ -67,8 +67,37 @@ const limiter = rateLimit({
 });
 
 app.use(limiter);
-app.listen(PORT, () => {
-  console.log(`app is listening on port ${PORT}`);
+// app.listen(PORT, () => {
+//   console.log(`app is listening on port ${PORT}`);
+// });
+
+const httpServer = createServer(app);
+const io = new Server(httpServer, { cors: "http://localhost:3000" });
+
+let onlineUsers = [];
+
+io.on("connection", (socket, req) => {
+  socket.on("addNewUser", ({ userId }) => {
+    !onlineUsers.some((user) => user.userId === userId) &&
+      onlineUsers.push({
+        userId,
+        socketId: socket.id,
+      });
+    console.log("online", onlineUsers);
+    io.emit("getOnlineUsers", onlineUsers);
+  });
+  socket.on("sendMessage", (message) => {
+    const user = onlineUsers.find((u) => u.userId == message.recipientId);
+    console.log("Sending to ", user, message.recipientId);
+    if (user) io.to(user.socketId).emit("getMessage", message);
+  });
+  socket.on("disconnect", () => {
+    onlineUsers.filter((user) => user.socketId !== socket.id);
+    console.log("offline", onlineUsers);
+    io.emit("getOnlineUsers", onlineUsers);
+  });
 });
 
-
+const server = httpServer.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
