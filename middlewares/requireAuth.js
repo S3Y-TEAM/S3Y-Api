@@ -4,6 +4,9 @@ import { roleSelection } from "../controllers/UserName.js";
 import { responseBody } from "../utils/ResponseBody.js";
 
 const requireAuth = async (req, res, next) => {
+  if (req.method === "OPTIONS") {
+    return next();
+  }
   let { role, authorization } = req.headers;
   if (!authorization || !role) {
     return res
@@ -22,11 +25,10 @@ const requireAuth = async (req, res, next) => {
   try {
     const decodedToken = isTokenValid(token);
     role = roleSelection(role);
-    console.log(role, decodedToken, decodedToken.email);
     const u = await getUser(role, decodedToken.email);
     if (u) req.user = u;
     else throw new Error();
-
+    console.log("check is done");
     next();
   } catch (error) {
     console.log(error);
