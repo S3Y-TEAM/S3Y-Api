@@ -12,13 +12,13 @@ const paymentController = async (req, res) => {
         const task_price = task.price * 100;
         const token = await getToken();
         //console.log('Token:', token);
-        const orderId = await getOrderId(token, task_price);
+        const orderId = await getOrderId(token, task, task_price);
         //console.log('Order ID:', orderId);
         const paymentKey = await getPaymentKey(
             token,
             orderId,
             task_price,
-            task.body.billing_data
+            req.body.billing_data
         );
         //console.log('Payment key:', paymentKey);
         const payment = await prisma.Payments.create({
@@ -135,7 +135,7 @@ const getToken = async () => {
     }
 };
 
-const getOrderId = async (authToken, task_price) => {
+const getOrderId = async (authToken, task, task_price) => {
     try {
         const response = await axios.post(
             "https://accept.paymob.com/api/ecommerce/orders",
