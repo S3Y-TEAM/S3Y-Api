@@ -1,84 +1,182 @@
 import axios from "axios";
+import prisma from "../db/prisma.js";
+import { createHmac } from "crypto";
 
-
-const API_KEY = "ZXlKaGJHY2lPaUpJVXpVeE1pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SmpiR0Z6Y3lJNklrMWxjbU5vWVc1MElpd2ljSEp2Wm1sc1pWOXdheUk2T1RjeU5EYzVMQ0p1WVcxbElqb2lhVzVwZEdsaGJDSjkuUEYwRTdHMDBGTnNWdkJHT1V0TDJ4MEdMMHVfWkJWbF9QdWI5bkxiRmQ1MVI0Mnh2MXFvRFNvZmVMd3NQNk1KTnFtTzdTSXpmU0JrTTh0M21JN0dHNVE=" ; // Your API key
-const MERCHANT_ID = ""; // Your merchant ID
-const CARD_INTEGRATION_ID = ""; // Your card integration ID
-const paymentController = async(req,res)=>{
-
-    try{
-        
+const paymentController = async (req, res) => {
+    try {
+        const task = await prisma.Tasks.findUnique({
+            where: {
+                id: req.body.task_id,
+            },
+        });
+        const task_price = task.price * 100;
         const token = await getToken();
         //console.log('Token:', token);
-        const orderId = await getOrderId(token);
+        const orderId = await getOrderId(token, task, task_price);
         //console.log('Order ID:', orderId);
-        const paymentKey = await getPaymentKey(token, orderId);
+        const paymentKey = await getPaymentKey(
+            token,
+            orderId,
+            task_price,
+            req.body.billing_data
+        );
         //console.log('Payment key:', paymentKey);
-        const paymentResponse = await makePayment(paymentKey);
-
-        console.log('Payment successful:', paymentResponse);
-
-
-        res.status(200).json({message:"Payment Successful"})
-    }catch(err){
-        console.log(err.message) ;
-        res.status(500).json({message:"Payment Failed"})
+        const payment = await prisma.Payments.create({
+            data: {
+                id: orderId,
+                Total_amount: task.price,
+            },
+        });
+        await prisma.Tasks.update({
+            where: {
+                id: req.body.task_id,
+            },
+            data: {
+                Payments_id: payment.id,
+                Payments: {
+                    connect: [{ id: payment.id }],
+                },
+            },
+        });
+        const link = `https://accept.paymob.com/api/acceptance/iframes/${process.env.PAYMOB_IFRAME_ID}?payment_token=${paymentKey}`;
+        console.log("Payment successful:", paymentResponse);
+        res.status(200).json(link);
+    } catch (err) {
+        console.log(err.message);
+        res.status(500).json({ message: "Payment Failed" });
     }
-}
-const getToken = async () => {
-    const response = await axios.post('https://accept.paymob.com/api/auth/tokens', {
-        api_key: API_KEY
-    });
-    return response.data.token;
 };
-const getOrderId = async (authToken) => {
-    const response = await axios.post('https://accept.paymob.com/api/ecommerce/orders', {
-        auth_token: authToken,
-        delivery_needed: false,
-        amount_cents: '100', // Replace with actual amount
-        items : [] , // Add items here...
-        // merchant_id: MERCHANT_ID
-    });
-    return response.data.id;
-}
-const getPaymentKey = async (authToken, orderId) => {
-    const response = await axios.post('https://accept.paymob.com/api/acceptance/payment_keys', {
-            auth_token: authToken,
-            amount_cents: '100', // Replace with actual amount
-            expiration: 3600,
-            order_id: orderId,
-            billing_data: {
-                "apartment": "803", 
-                "email": "claudette09@exa.com", 
-                "floor": "42", 
-                "first_name": "Clifford", 
-                "street": "Ethan Land", 
-                "building": "8028", 
-                "phone_number": "01010101010", 
-                "shipping_method": "PKG", 
-                "postal_code": "01898", 
-                "city": "Jaskolskiburgh", 
-                "country": "CR", 
-                "last_name": "Nicolas", 
-                "state": "Utah"
-              } , // Add billing data here...
-            currency: 'EGP',
-            integration_id: 4560570,
-            
-    });
-    return response.data.token;
-}
-const makePayment = async (paymentKey) => {
-    const response = await axios.post('https://accept.paymob.com/api/acceptance/payments/pay', {
-        source: {
-            identifier: "cash", 
-            subtype: "CASH" 
-        },
-        payment_token: paymentKey
-    });
-    return response.data;
-}
 
-export {
-    paymentController
-}
+const paymentCallback = async (req, res) => {
+    const data = req.body.obj;
+    const amount_cents = data["amount_cents"];
+    const created_at = data["created_at"];
+    const currency = data["currency"];
+    const error_occured = data["error_occured"];
+    const has_parent_transaction = data["has_parent_transaction"];
+    const id = data["id"];
+    const integration_id = data["integration_id"];
+    const is_3d_secure = data["is_3d_secure"];
+    const is_auth = data["is_auth"];
+    const is_capture = data["is_capture"];
+    const is_refunded = data["is_refunded"];
+    const is_standalone_payment = data["is_standalone_payment"];
+    const is_voided = data["is_voided"];
+    const order_id = data.order.id;
+    const owner = data.owner;
+    const pending = data.pending;
+    const source_data_pan = data.source_data.pan;
+    const source_data_sub_type = data.source_data.sub_type;
+    data_string =
+        amount_cents +
+        created_at +
+        currency +
+        error_occured +
+        has_parent_transaction +
+        id +
+        integration_id +
+        is_3d_secure +
+        is_auth +
+        is_capture +
+        is_refunded +
+        is_standalone_payment +
+        is_voided +
+        order_id +
+        owner +
+        pending +
+        source_data_pan +
+        source_data_sub_type;
+    hashed_data = createHmac("SHA512", process.env.PAYMOB_HMAC)
+        .update(data_string)
+        .digest("hex");
+    if (hashed_data === req.query.hmac) {
+        const payment = await prisma.Payments.update({
+            where: {
+                id: req.body.obj.order.id,
+            },
+            data: {
+                status: 1,
+            },
+        });
+        const Task = await prisma.Tasks.findOne({
+            where: {
+                Payments_id: req.body.obj.order.id,
+            },
+        });
+        const application = await prisma.Application.findOne({
+            where: {
+                taskId: Task.id,
+                accepted: true,
+            },
+        });
+        const task_has_emp = await prisma.Tasks_has_employee.create({
+            data: {
+                Tasks_id: Task.id,
+                employee_id: application.employeeId,
+            },
+        });
+    }
+};
+
+const getToken = async () => {
+    try {
+        const response = await axios.post(
+            "https://accept.paymob.com/api/auth/tokens",
+            {
+                api_key: process.env.PAYMOB_API_KEY,
+            },
+            {
+                headers: { "Content-Type": "application/json" },
+            }
+        );
+        return response.data.token;
+    } catch (error) {
+        console.error("Error authenticating:", error.response.data);
+    }
+};
+
+const getOrderId = async (authToken, task, task_price) => {
+    try {
+        const response = await axios.post(
+            "https://accept.paymob.com/api/ecommerce/orders",
+            {
+                auth_token: authToken,
+                delivery_needed: false,
+                amount_cents: task_price.toString(),
+                currency: "EGP",
+                items: [task],
+            },
+            {
+                headers: { "Content-Type": "application/json" },
+            }
+        );
+        return response.data.id;
+    } catch (error) {
+        console.error("Error creating order:", error.response.data);
+    }
+};
+
+const getPaymentKey = async (authToken, orderId, task_price, billing_data) => {
+    try {
+        const response = await axios.post(
+            "https://accept.paymob.com/api/acceptance/payment_keys",
+            {
+                auth_token: authToken,
+                amount_cents: task_price,
+                expiration: 3600,
+                order_id: orderId,
+                billing_data,
+                currency: "EGP",
+                integration_id: process.env.PAYMOB_INTEGRATION_ID,
+            },
+            {
+                headers: { "Content-Type": "application/json" },
+            }
+        );
+        return response.data.token;
+    } catch (error) {
+        console.error("Error creating payment key:", error.response.data);
+    }
+};
+
+export { paymentController, paymentCallback };
