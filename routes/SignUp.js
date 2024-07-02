@@ -1,9 +1,10 @@
 import express from 'express' ;
 const router =  express.Router() ;
 import {signUpController} from '../controllers/SignUp.js' ;
-import multer from "multer";
-const upload = multer({ dest: 'uploads/' });
-router.post('/signup' ,upload.any() ,signUpController) ;
+// import multer from "multer";
+// const upload = multer({ dest: 'uploads/' });
+// router.post('/signup' ,upload.any() ,signUpController) ;
+router.post('/signup' ,signUpController) ;
 
 export {
     router as signUpRoute
