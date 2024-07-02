@@ -116,6 +116,7 @@ const paymentCallback = async (req, res) => {
             },
         });
     }
+    res.status(200);
 };
 
 const getToken = async () => {
