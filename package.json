@@ -5,8 +5,8 @@
   "main": "app.js",
   "type": "module",
   "scripts": {
-    "start": "node src/app.js",
-    
+    "start": "node api/app.js",
+    "vercel-build": "echo hello",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

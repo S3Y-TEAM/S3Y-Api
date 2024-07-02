@@ -1,20 +1,20 @@
 import express from "express";
-import { userNameRoute } from "./routes/UserName.js";
-import { categoriesRoute } from "./routes/Categories.js";
-import { emailRoute } from "./routes/Email.js";
-import { phoneRoute } from "./routes/Phone.js";
-import { signUpRoute } from "./routes/SignUp.js";
-import { signInRoute } from "./routes/SignIn.js";
-import { forgetPasswordRoute } from "./routes/ForgetPassword.js";
-import { resetPasswordRoute } from "./routes/ResetPassword.js";
-import { logOutRoute } from "./routes/LogOut.js";
-import { taskRoute } from "./routes/taskRoute.js";
-import { employeeRoute } from "./routes/employeeRoute.js";
-import { employerRoute } from "./routes/employerRoute.js";
-import { chatRoute } from "./routes/chatRoute.js";
-import { messageRoute } from "./routes/messageRoute.js";
-import { userRoute } from "./routes/userRoute.js";
-import { paymentRoute } from "./routes/payment.js";
+import { userNameRoute } from "../routes/UserName.js";
+import { categoriesRoute } from "../routes/Categories.js";
+import { emailRoute } from "../routes/Email.js";
+import { phoneRoute } from "../routes/Phone.js";
+import { signUpRoute } from "../routes/SignUp.js";
+import { signInRoute } from "../routes/SignIn.js";
+import { forgetPasswordRoute } from "../routes/ForgetPassword.js";
+import { resetPasswordRoute } from "../routes/ResetPassword.js";
+import { logOutRoute } from "../routes/LogOut.js";
+import { taskRoute } from "../routes/taskRoute.js";
+import { employeeRoute } from "../routes/employeeRoute.js";
+import { employerRoute } from "../routes/employerRoute.js";
+import { chatRoute } from "../routes/chatRoute.js";
+import { messageRoute } from "../routes/messageRoute.js";
+import { userRoute } from "../routes/userRoute.js";
+import { paymentRoute } from "../routes/payment.js";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import cookieParser from "cookie-parser";
@@ -102,3 +102,6 @@ io.on("connection", (socket, req) => {
 const server = httpServer.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
+export default app;
+
