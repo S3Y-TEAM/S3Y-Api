@@ -47,7 +47,7 @@ const paymentController = async (req, res) => {
         res.status(200).json(link);
     } catch (err) {
         console.log(err.message);
-        res.status(500).json({ message: "Payment Failed" });
+        res.status(500).json({ message: err.message });
     }
 };
 
@@ -126,7 +126,7 @@ const paymentCallback = async (req, res) => {
 };
 
 const getToken = async () => {
-    try {
+    //try {
         const response = await axios.post(
             "https://accept.paymob.com/api/auth/tokens",
             {
@@ -137,13 +137,13 @@ const getToken = async () => {
             }
         );
         return response.data.token;
-    } catch (error) {
-        console.error("Error authenticating:", error.response.data);
-    }
+    //} catch (error) {
+    //    console.error("Error authenticating:", error.response.data);
+    //}
 };
 
 const getOrderId = async (authToken, task, task_price) => {
-    try {
+    //try {
         const response = await axios.post(
             "https://accept.paymob.com/api/ecommerce/orders",
             {
@@ -158,13 +158,13 @@ const getOrderId = async (authToken, task, task_price) => {
             }
         );
         return response.data.id;
-    } catch (error) {
-        console.error("Error creating order:", error.response.data);
-    }
+    //} catch (error) {
+    //    console.error("Error creating order:", error.response.data);
+    //}
 };
 
 const getPaymentKey = async (authToken, orderId, task_price, billing_data) => {
-    try {
+    //try {
         const response = await axios.post(
             "https://accept.paymob.com/api/acceptance/payment_keys",
             {
@@ -181,9 +181,9 @@ const getPaymentKey = async (authToken, orderId, task_price, billing_data) => {
             }
         );
         return response.data.token;
-    } catch (error) {
-        console.error("Error creating payment key:", error.response.data);
-    }
+    //} catch (error) {
+    //    console.error("Error creating payment key:", error.response.data);
+    //}
 };
 
 export { paymentController, paymentCallback };
