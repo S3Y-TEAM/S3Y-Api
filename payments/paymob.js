@@ -4,11 +4,15 @@ import { createHmac } from "crypto";
 
 const paymentController = async (req, res) => {
     try {
-        const task = await prisma.Tasks.findUnique({
+        /*const task = await prisma.Tasks.findUnique({
             where: {
                 id: req.body.task_id,
             },
-        });
+        });*/
+        const task = {
+            id: 1,
+            price: 100,
+        };
         const task_price = task.price * 100;
         const token = await getToken();
         //console.log('Token:', token);
@@ -21,7 +25,7 @@ const paymentController = async (req, res) => {
             req.body.billing_data
         );
         //console.log('Payment key:', paymentKey);
-        const payment = await prisma.Payments.create({
+        /*const payment = await prisma.Payments.create({
             data: {
                 id: orderId,
                 Total_amount: task.price,
@@ -37,7 +41,7 @@ const paymentController = async (req, res) => {
                     connect: [{ id: payment.id }],
                 },
             },
-        });
+        });*/
         const link = `https://accept.paymob.com/api/acceptance/iframes/${process.env.PAYMOB_IFRAME_ID}?payment_token=${paymentKey}`;
         console.log("Payment successful:", paymentResponse);
         res.status(200).json(link);
@@ -89,8 +93,9 @@ const paymentCallback = async (req, res) => {
     hashed_data = createHmac("SHA512", process.env.PAYMOB_HMAC)
         .update(data_string)
         .digest("hex");
+    let result = false;
     if (hashed_data === req.query.hmac) {
-        const payment = await prisma.Payments.update({
+        /*const payment = await prisma.Payments.update({
             where: {
                 id: req.body.obj.order.id,
             },
@@ -114,9 +119,10 @@ const paymentCallback = async (req, res) => {
                 Tasks_id: Task.id,
                 employee_id: application.employeeId,
             },
-        });
+        });*/
+        result = true;
     }
-    res.status(200);
+    res.status(200).json(result);
 };
 
 const getToken = async () => {
