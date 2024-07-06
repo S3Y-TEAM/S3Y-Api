@@ -8,7 +8,7 @@ import { signInRoute } from "../routes/SignIn.js";
 import { forgetPasswordRoute } from "../routes/ForgetPassword.js";
 import { resetPasswordRoute } from "../routes/ResetPassword.js";
 import { logOutRoute } from "../routes/LogOut.js";
-// import { taskRoute } from "../routes/taskRoute.js";
+import { taskRoute } from "../routes/taskRoute.js";
 import { employeeRoute } from "../routes/employeeRoute.js";
 import { employerRoute } from "../routes/employerRoute.js";
 import { chatRoute } from "../routes/chatRoute.js";
@@ -37,7 +37,7 @@ const PORT = process.env.PORT || 8000;
 app.use(express.json());
 app.use(cookieParser(process.env.JWT_SECRET));
 
-// Middleware for headers
+//Middleware for headers
 app.use((req, res, next) => {
   res.setHeader("Authorization", "Bearer PlaceHolderToken");
   next();
@@ -52,7 +52,7 @@ app.use("/api/v1", forgetPasswordRoute);
 app.use("/api/v1", resetPasswordRoute);
 app.use("/api/v1", logOutRoute);
 app.use("/api/v1", paymentRoute);
-// app.use("/api/v1/tasks", taskRoute);
+app.use("/api/v1/tasks", taskRoute);
 app.use("/api/v1/employee", employeeRoute);
 app.use("/api/v1/employer", employerRoute);
 app.use("/api/v1/chats", chatRoute);
@@ -104,4 +104,3 @@ const server = httpServer.listen(PORT, () => {
 });
 
 export default app;
-
