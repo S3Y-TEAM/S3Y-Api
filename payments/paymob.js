@@ -51,7 +51,7 @@ const paymentController = async (req, res) => {
                 },
             },
         });*/
-        console.log("Payment successful:", paymentResponse);
+        console.log("Payment successful:", client_url);
         res.status(200).json(client_url);
     } catch (err) {
         console.log(err.message);
