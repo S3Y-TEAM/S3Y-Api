@@ -28,7 +28,6 @@ const requireAuth = async (req, res, next) => {
     const u = await getUser(role, decodedToken.email);
     if (u) req.user = u;
     else throw new Error();
-    console.log("check is done");
     next();
   } catch (error) {
     console.log(error);

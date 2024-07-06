@@ -19,6 +19,7 @@ model Employer {
   city         String     @db.VarChar(45)
   Address      String     @db.VarChar(60)
   user_name    String     @unique @db.VarChar(45)
+  rating       Int?
   Tasks        Tasks[]
   messages     messages[]
   problems     problems[]
@@ -47,12 +48,11 @@ model Payments {
 model Tasks {
   id                 Int                 @unique @default(autoincrement())
   Title              String              @db.VarChar(45)
-  Descr              String              @db.VarChar(200)
+  Descr              String              @db.VarChar(500)
   status             String              @default("Not Started") @db.VarChar(45)
   posting_date       DateTime
   deadline           DateTime
-  Address            String              @db.VarChar(45)
-  img                Bytes?
+  Address            String              @db.VarChar(255)
   note               String?             @db.VarChar(100)
   Employer_id        Int
   category_id        Int
@@ -62,6 +62,7 @@ model Tasks {
   city               String?             @db.VarChar(45)
   price_range        String?             @db.VarChar(45)
   price              Float?
+  img                Json?
   applicants         Application[]
   Employer           Employer            @relation(fields: [Employer_id], references: [id], onDelete: Cascade, map: "fk_Tasks_Employer1")
   Payments           Payments?           @relation(fields: [Payments_id], references: [id], onDelete: Cascade, map: "fk_Tasks_Payments1")
@@ -130,10 +131,11 @@ model employee {
   National_image        String                @db.VarChar(200)
   country               String                @db.VarChar(45)
   city                  String                @db.VarChar(45)
-  Address               String                @db.VarChar(45)
+  Address               String                @db.VarChar(255)
   user_name             String                @unique @db.VarChar(45)
   verified              Int
   experience            String                @db.VarChar(45)
+  rating                Int?
   applications          Application[]
   employee_has_category EmployeeHasCategory[]
   Links                 Links[]

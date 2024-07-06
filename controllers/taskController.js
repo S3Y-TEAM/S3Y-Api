@@ -1,5 +1,6 @@
 import prisma from "../db/prisma.js";
 import { responseBody } from "../utils/ResponseBody.js";
+import { handler } from "../utils/fileUpload.js";
 
 const createTask = async (req, res) => {
   const { id } = req.user;
@@ -16,7 +17,7 @@ const createTask = async (req, res) => {
     price_range,
     note,
   } = req.body;
-  const image = req.file;
+  const image = await handler(req, res);
 
   if (
     !title ||
@@ -26,6 +27,7 @@ const createTask = async (req, res) => {
     !deadline ||
     !address
   ) {
+    console.log(title, description, category, employerId, deadline, address);
     return res
       .status(400)
       .json(responseBody("failed", "Missing parameters", 400, null));
@@ -63,10 +65,10 @@ const createTask = async (req, res) => {
         city,
         Address: address,
         price_range,
-        img: image ? image.path : null,
         note,
+        img: image,
         category: { connect: { id: foundCategory.id } },
-        Employer: { connect: { id: employerId } },
+        Employer: { connect: { id: parseInt(employerId) } },
       },
     });
 
