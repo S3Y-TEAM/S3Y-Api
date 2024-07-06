@@ -4,49 +4,42 @@ import { createHmac } from "crypto";
 
 const paymentController = async (req, res) => {
     try {
-        /*const task = await prisma.Tasks.findUnique({
+        const task = await prisma.Tasks.findUnique({
             where: {
-                id: req.body.task_id,
+                id: parseInt(req.body.task_id),
             },
-        });*/
-        const task = {
-            id: 1,
-            price: 100,
-        };
+        });
         const task_price = task.price * 100;
+        const employer = await prisma.Employer.findUnique({
+            where: {
+                id: task.Employer_id,
+            },
+        });
         const token = await getToken();
-        //console.log('Token:', token);
-        const orderId = await getOrderId(token, task, task_price);
-        //console.log('Order ID:', orderId);
-        const paymentKey = await getPaymentKey(
+        const paymentData = await getPayment(
             token,
-            orderId,
             task_price,
-            req.body.billing_data
+            employer
         );
-        //console.log('Payment key:', paymentKey);
-        /*const payment = await prisma.Payments.create({
+        const payment = await prisma.Payments.create({
             data: {
-                id: orderId,
+                id: parseInt(paymentData.order),
                 Total_amount: task.price,
+                date: new Date(),
             },
         });
         await prisma.Tasks.update({
             where: {
-                id: req.body.task_id,
+                id: parseInt(req.body.task_id),
             },
             data: {
-                Payments_id: payment.id,
                 Payments: {
-                    connect: [{ id: payment.id }],
+                    connect: { id: payment.id },
                 },
             },
-        });*/
-        const link = `https://accept.paymob.com/api/acceptance/iframes/${process.env.PAYMOB_IFRAME_ID}?payment_token=${paymentKey}`;
-        console.log("Payment successful:", paymentResponse);
-        res.status(200).json(link);
+        });
+        res.status(200).json(paymentData.client_url);
     } catch (err) {
-        console.log(err.message);
         res.status(500).json({ message: err.message });
     }
 };
@@ -93,11 +86,10 @@ const paymentCallback = async (req, res) => {
     hashed_data = createHmac("SHA512", process.env.PAYMOB_HMAC)
         .update(data_string)
         .digest("hex");
-    let result = false;
     if (hashed_data === req.query.hmac) {
-        /*const payment = await prisma.Payments.update({
+        await prisma.Payments.update({
             where: {
-                id: req.body.obj.order.id,
+                id: parseInt(req.body.obj.order.id),
             },
             data: {
                 status: 1,
@@ -105,7 +97,7 @@ const paymentCallback = async (req, res) => {
         });
         const Task = await prisma.Tasks.findOne({
             where: {
-                Payments_id: req.body.obj.order.id,
+                Payments_id: parseInt(req.body.obj.order.id),
             },
         });
         const application = await prisma.Application.findOne({
@@ -114,76 +106,48 @@ const paymentCallback = async (req, res) => {
                 accepted: true,
             },
         });
-        const task_has_emp = await prisma.Tasks_has_employee.create({
+        await prisma.Tasks_has_employee.create({
             data: {
                 Tasks_id: Task.id,
                 employee_id: application.employeeId,
             },
-        });*/
-        result = true;
+        });
     }
-    res.status(200).json(result);
+    res.status(200);
 };
 
 const getToken = async () => {
-    //try {
-        const response = await axios.post(
-            "https://accept.paymob.com/api/auth/tokens",
-            {
-                api_key: process.env.PAYMOB_API_KEY,
-            },
-            {
-                headers: { "Content-Type": "application/json" },
-            }
-        );
-        return response.data.token;
-    //} catch (error) {
-    //    console.error("Error authenticating:", error.response.data);
-    //}
+    const response = await axios.post(
+        "https://accept.paymob.com/api/auth/tokens",
+        {
+            api_key: process.env.PAYMOB_API_KEY,
+        },
+        {
+            headers: { "Content-Type": "application/json" },
+        }
+    );
+    return response.data.token;
 };
 
-const getOrderId = async (authToken, task, task_price) => {
-    //try {
-        const response = await axios.post(
-            "https://accept.paymob.com/api/ecommerce/orders",
-            {
-                auth_token: authToken,
-                delivery_needed: false,
-                amount_cents: task_price.toString(),
-                currency: "EGP",
-                items: [task],
+const getPayment = async (token, task_price, employer) => {
+    const response = await axios.post(
+        "https://accept.paymob.com/api/ecommerce/payment-links",
+        {
+            amount_cents: task_price,
+            payment_methods: [process.env.PAYMOB_INTEGRATION_ID],
+            full_name: employer.Fname + " " + employer.Lname,
+            phone_number: "+20" + employer.Phone_number,
+            email: employer.Email,
+            is_live: false,
+        },
+        {
+            headers: {
+                "Authorization": "Bearer " + token,
+                "Content-Type": "application/json",
             },
-            {
-                headers: { "Content-Type": "application/json" },
-            }
-        );
-        return response.data.id;
-    //} catch (error) {
-    //    console.error("Error creating order:", error.response.data);
-    //}
-};
-
-const getPaymentKey = async (authToken, orderId, task_price, billing_data) => {
-    //try {
-        const response = await axios.post(
-            "https://accept.paymob.com/api/acceptance/payment_keys",
-            {
-                auth_token: authToken,
-                amount_cents: task_price,
-                expiration: 3600,
-                order_id: orderId,
-                billing_data,
-                currency: "EGP",
-                integration_id: process.env.PAYMOB_INTEGRATION_ID,
-            },
-            {
-                headers: { "Content-Type": "application/json" },
-            }
-        );
-        return response.data.token;
-    //} catch (error) {
-    //    console.error("Error creating payment key:", error.response.data);
-    //}
+        }
+    );
+    return response.data;
 };
 
 export { paymentController, paymentCallback };
