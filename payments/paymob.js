@@ -3,26 +3,28 @@ import prisma from "../db/prisma.js";
 import { createHmac } from "crypto";
 
 const paymentController = async (req, res) => {
+    let token;
+    const task = {
+        id: 1,
+        Title: "test title",
+        Descr: "test desc",
+        price: 100,
+        employer_name: "test",
+        employer_phone: "+201097392965",
+        employer_email: "test@test.com"
+    };
+    const task_price = task.price * 100;
     try {
         /*const task = await prisma.Tasks.findUnique({
             where: {
                 id: req.body.task_id,
             },
         });*/
-        const task = {
-            id: 1,
-            Title: "test title",
-            Descr: "test desc",
-            price: 100,
-            employer_name: "test",
-            employer_phone: "+201097392965",
-            employer_email: "test@test.com"
-        };
-        const task_price = task.price * 100;
-        const token = await getToken();
+        token = await getToken();
         //console.log('Token:', token);
         //const orderId = await getOrderId(token, task, task_price);
         //console.log('Order ID:', orderId);
+        res.status(200).json({token: token});
     } catch(err) {
         res.status(501).json({message: err.message});
     }
