@@ -4,7 +4,6 @@ import { createHmac } from "crypto";
 
 const paymentController = async (req, res) => {
     try {
-        console.log(req.body);
         const task = await prisma.Tasks.findUnique({
             where: {
                 id: parseInt(req.body.task_id),
@@ -16,7 +15,7 @@ const paymentController = async (req, res) => {
                 id: task.Employer_id,
             },
         });
-        token = await getToken();
+        const token = await getToken();
         const paymentData = await getPayment(
             token,
             task_price,
