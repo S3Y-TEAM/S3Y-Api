@@ -11,18 +11,22 @@ const paymentController = async (req, res) => {
         });*/
         const task = {
             id: 1,
+            Title: "test title",
+            Descr: "test desc",
             price: 100,
+            employer_name: "test",
+            employer_phone: "+201097392965",
+            employer_email: "test@test.com"
         };
         const task_price = task.price * 100;
         const token = await getToken();
         //console.log('Token:', token);
-        const orderId = await getOrderId(token, task, task_price);
+        //const orderId = await getOrderId(token, task, task_price);
         //console.log('Order ID:', orderId);
-        const paymentKey = await getPaymentKey(
+        const client_url = await getPaymentKey(
             token,
-            orderId,
-            task_price,
-            req.body.billing_data
+            task,
+            task_price
         );
         //console.log('Payment key:', paymentKey);
         /*const payment = await prisma.Payments.create({
@@ -42,9 +46,8 @@ const paymentController = async (req, res) => {
                 },
             },
         });*/
-        const link = `https://accept.paymob.com/api/acceptance/iframes/${process.env.PAYMOB_IFRAME_ID}?payment_token=${paymentKey}`;
         console.log("Payment successful:", paymentResponse);
-        res.status(200).json(link);
+        res.status(200).json(client_url);
     } catch (err) {
         console.log(err.message);
         res.status(500).json({ message: err.message });
@@ -163,24 +166,25 @@ const getOrderId = async (authToken, task, task_price) => {
     //}
 };
 
-const getPaymentKey = async (authToken, orderId, task_price, billing_data) => {
+const getPaymentKey = async (token, task, task_price) => {
     //try {
         const response = await axios.post(
-            "https://accept.paymob.com/api/acceptance/payment_keys",
+            "https://accept.paymob.com/v1/intention/",
             {
-                auth_token: authToken,
                 amount_cents: task_price,
-                expiration: 3600,
-                order_id: orderId,
-                billing_data,
-                currency: "EGP",
-                integration_id: process.env.PAYMOB_INTEGRATION_ID,
+                payment_methods: process.env.PAYMOB_INTEGRATION_ID,
+                full_name: task.employer_name,
+                phone_number: task.employer_phone,
+                email: task.employer_email,
             },
             {
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Authorization": "Token " + token, 
+                    "Content-Type": "application/json",
+                },
             }
         );
-        return response.data.token;
+        return response.data.client_url;
     //} catch (error) {
     //    console.error("Error creating payment key:", error.response.data);
     //}
