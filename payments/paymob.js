@@ -25,6 +25,7 @@ const paymentController = async (req, res) => {
             data: {
                 id: parseInt(paymentData.order),
                 Total_amount: task.price,
+                date: new Date(),
             },
         });
         await prisma.Tasks.update({
