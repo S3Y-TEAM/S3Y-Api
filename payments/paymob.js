@@ -23,6 +23,10 @@ const paymentController = async (req, res) => {
         //console.log('Token:', token);
         //const orderId = await getOrderId(token, task, task_price);
         //console.log('Order ID:', orderId);
+    } catch(err) {
+        res.status(501).json({message: err.message});
+    }
+    try {
         const client_url = await getPaymentKey(
             token,
             task,
@@ -50,7 +54,7 @@ const paymentController = async (req, res) => {
         res.status(200).json(client_url);
     } catch (err) {
         console.log(err.message);
-        res.status(500).json({ message: err.message });
+        res.status(502).json({ message: err.message });
     }
 };
 
