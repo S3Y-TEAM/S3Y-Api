@@ -4,9 +4,10 @@ import { createHmac } from "crypto";
 
 const paymentController = async (req, res) => {
     try {
+        console.log(req.body);
         const task = await prisma.Tasks.findUnique({
             where: {
-                id: req.body.task_id,
+                id: parseInt(req.body.task_id),
             },
         });
         const task_price = task.price * 100;
@@ -23,13 +24,13 @@ const paymentController = async (req, res) => {
         );
         const payment = await prisma.Payments.create({
             data: {
-                id: paymentData.order,
+                id: parseInt(paymentData.order),
                 Total_amount: task.price,
             },
         });
         await prisma.Tasks.update({
             where: {
-                id: req.body.task_id,
+                id: parseInt(req.body.task_id),
             },
             data: {
                 Payments_id: payment.id,
@@ -89,7 +90,7 @@ const paymentCallback = async (req, res) => {
     if (hashed_data === req.query.hmac) {
         await prisma.Payments.update({
             where: {
-                id: req.body.obj.order.id,
+                id: parseInt(req.body.obj.order.id),
             },
             data: {
                 status: 1,
@@ -97,7 +98,7 @@ const paymentCallback = async (req, res) => {
         });
         const Task = await prisma.Tasks.findOne({
             where: {
-                Payments_id: req.body.obj.order.id,
+                Payments_id: parseInt(req.body.obj.order.id),
             },
         });
         const application = await prisma.Application.findOne({
