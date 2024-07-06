@@ -336,10 +336,38 @@ const listApplications = async (req, res) => {
   }
 };
 
+const listCategories = async (req, res) => {
+  const { parent } = req.params;
+  if (!parent)
+    return res
+      .status(400)
+      .json(responseBody("failed", "Missing parameters", 400, null));
+  try {
+    const categories = await prisma.category.findMany({
+      where: {
+        parent: parent,
+      },
+    });
+    if (!categories)
+      return res
+        .status(404)
+        .json(responseBody("failed", "No categories found", 404, null));
+    return res.json(
+      responseBody("success", "categories retrieved", 200, { categories })
+    );
+  } catch (err) {
+    console.log(err);
+    res
+      .status(500)
+      .json(responseBody("failed", "Internal server error", 500, null));
+  }
+};
+
 export {
   createTask,
   getTaskDetails,
   applyForTask,
   acceptApplicant,
   listApplications,
+  listCategories,
 };

@@ -3,3 +3,4 @@ node_modules/
 testLocal/
 functions
 .vercel
+apikeys.json
