@@ -24,7 +24,6 @@ const paymentController = async (req, res) => {
         //console.log('Token:', token);
         //const orderId = await getOrderId(token, task, task_price);
         //console.log('Order ID:', orderId);
-        res.status(200).json({token: token});
     } catch(err) {
         res.status(501).json({message: err.message});
     }
@@ -178,14 +177,15 @@ const getPaymentKey = async (token, task, task_price) => {
             "https://accept.paymob.com/api/ecommerce/payment-links",
             {
                 amount_cents: task_price,
-                payment_methods: process.env.PAYMOB_INTEGRATION_ID,
+                payment_methods: [process.env.PAYMOB_INTEGRATION_ID],
                 full_name: task.employer_name,
                 phone_number: task.employer_phone,
                 email: task.employer_email,
+                is_live: false,
             },
             {
                 headers: {
-                    "Authorization": "Token " + token, 
+                    "Authorization": "Bearer " + token, 
                     "Content-Type": "application/json",
                 },
             }
