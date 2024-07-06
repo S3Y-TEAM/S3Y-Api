@@ -3,40 +3,27 @@ import prisma from "../db/prisma.js";
 import { createHmac } from "crypto";
 
 const paymentController = async (req, res) => {
-    let token;
-    const task = {
-        id: 1,
-        Title: "test title",
-        Descr: "test desc",
-        price: 100,
-        employer_name: "test",
-        employer_phone: "+201097392965",
-        employer_email: "test@test.com"
-    };
-    const task_price = task.price * 100;
     try {
-        /*const task = await prisma.Tasks.findUnique({
+        const task = await prisma.Tasks.findUnique({
             where: {
                 id: req.body.task_id,
             },
-        });*/
+        });
+        const task_price = task.price * 100;
+        const employer = await prisma.Employer.findUnique({
+            where: {
+                id: task.Employer_id,
+            },
+        });
         token = await getToken();
-        //console.log('Token:', token);
-        //const orderId = await getOrderId(token, task, task_price);
-        //console.log('Order ID:', orderId);
-    } catch(err) {
-        res.status(501).json({message: err.message});
-    }
-    try {
-        const client_url = await getPaymentKey(
+        const paymentData = await getPayment(
             token,
-            task,
-            task_price
+            task_price,
+            employer
         );
-        //console.log('Payment key:', paymentKey);
-        /*const payment = await prisma.Payments.create({
+        const payment = await prisma.Payments.create({
             data: {
-                id: orderId,
+                id: paymentData.order,
                 Total_amount: task.price,
             },
         });
@@ -50,12 +37,10 @@ const paymentController = async (req, res) => {
                     connect: [{ id: payment.id }],
                 },
             },
-        });*/
-        console.log("Payment successful:", client_url);
-        res.status(200).json(client_url);
+        });
+        res.status(200).json(paymentData.client_url);
     } catch (err) {
-        console.log(err.message);
-        res.status(502).json({ message: err.message });
+        res.status(500).json({ message: err.message });
     }
 };
 
@@ -101,9 +86,8 @@ const paymentCallback = async (req, res) => {
     hashed_data = createHmac("SHA512", process.env.PAYMOB_HMAC)
         .update(data_string)
         .digest("hex");
-    let result = false;
     if (hashed_data === req.query.hmac) {
-        /*const payment = await prisma.Payments.update({
+        await prisma.Payments.update({
             where: {
                 id: req.body.obj.order.id,
             },
@@ -122,78 +106,48 @@ const paymentCallback = async (req, res) => {
                 accepted: true,
             },
         });
-        const task_has_emp = await prisma.Tasks_has_employee.create({
+        await prisma.Tasks_has_employee.create({
             data: {
                 Tasks_id: Task.id,
                 employee_id: application.employeeId,
             },
-        });*/
-        result = true;
+        });
     }
-    res.status(200).json(result);
+    res.status(200);
 };
 
 const getToken = async () => {
-    //try {
-        const response = await axios.post(
-            "https://accept.paymob.com/api/auth/tokens",
-            {
-                api_key: process.env.PAYMOB_API_KEY,
-            },
-            {
-                headers: { "Content-Type": "application/json" },
-            }
-        );
-        return response.data.token;
-    //} catch (error) {
-    //    console.error("Error authenticating:", error.response.data);
-    //}
+    const response = await axios.post(
+        "https://accept.paymob.com/api/auth/tokens",
+        {
+            api_key: process.env.PAYMOB_API_KEY,
+        },
+        {
+            headers: { "Content-Type": "application/json" },
+        }
+    );
+    return response.data.token;
 };
 
-const getOrderId = async (authToken, task, task_price) => {
-    //try {
-        const response = await axios.post(
-            "https://accept.paymob.com/api/ecommerce/orders",
-            {
-                auth_token: authToken,
-                delivery_needed: false,
-                amount_cents: task_price.toString(),
-                currency: "EGP",
-                items: [task],
+const getPayment = async (token, task_price, employer) => {
+    const response = await axios.post(
+        "https://accept.paymob.com/api/ecommerce/payment-links",
+        {
+            amount_cents: task_price,
+            payment_methods: [process.env.PAYMOB_INTEGRATION_ID],
+            full_name: employer.Fname + " " + employer.Lname,
+            phone_number: "+20" + employer.Phone_number,
+            email: employer.Email,
+            is_live: false,
+        },
+        {
+            headers: {
+                "Authorization": "Bearer " + token,
+                "Content-Type": "application/json",
             },
-            {
-                headers: { "Content-Type": "application/json" },
-            }
-        );
-        return response.data.id;
-    //} catch (error) {
-    //    console.error("Error creating order:", error.response.data);
-    //}
-};
-
-const getPaymentKey = async (token, task, task_price) => {
-    //try {
-        const response = await axios.post(
-            "https://accept.paymob.com/api/ecommerce/payment-links",
-            {
-                amount_cents: task_price,
-                payment_methods: [process.env.PAYMOB_INTEGRATION_ID],
-                full_name: task.employer_name,
-                phone_number: task.employer_phone,
-                email: task.employer_email,
-                is_live: false,
-            },
-            {
-                headers: {
-                    "Authorization": "Bearer " + token, 
-                    "Content-Type": "application/json",
-                },
-            }
-        );
-        return response.data.client_url;
-    //} catch (error) {
-    //    console.error("Error creating payment key:", error.response.data);
-    //}
+        }
+    );
+    return response.data;
 };
 
 export { paymentController, paymentCallback };
