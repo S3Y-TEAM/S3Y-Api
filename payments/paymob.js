@@ -33,7 +33,6 @@ const paymentController = async (req, res) => {
                 id: parseInt(req.body.task_id),
             },
             data: {
-                Payments_id: payment.id,
                 Payments: {
                     connect: [{ id: payment.id }],
                 },
