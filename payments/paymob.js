@@ -34,7 +34,7 @@ const paymentController = async (req, res) => {
             },
             data: {
                 Payments: {
-                    connect: [{ id: payment.id }],
+                    connect: { id: payment.id },
                 },
             },
         });
