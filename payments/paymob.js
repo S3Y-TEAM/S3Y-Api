@@ -169,7 +169,7 @@ const getOrderId = async (authToken, task, task_price) => {
 const getPaymentKey = async (token, task, task_price) => {
     //try {
         const response = await axios.post(
-            "https://accept.paymob.com/v1/intention/",
+            "https://accept.paymob.com/api/ecommerce/payment-links",
             {
                 amount_cents: task_price,
                 payment_methods: process.env.PAYMOB_INTEGRATION_ID,
