@@ -32,6 +32,7 @@ const getEmployeeTasks = async (req, res) => {
         task: {
           include: {
             category: true,
+            Employer: true,
           },
         },
       },
@@ -83,6 +84,7 @@ const getEmpAppliedJobs = async (req, res) => {
         task: {
           include: {
             category: true,
+            Employer: true,
             applicants: {
               where: {
                 employeeId: parseInt(employeeId),
