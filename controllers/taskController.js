@@ -8,7 +8,6 @@ const createTask = async (req, res) => {
     title,
     description,
     category,
-    employerId,
     posting_date,
     deadline,
     country,
@@ -19,33 +18,14 @@ const createTask = async (req, res) => {
   } = req.body;
   const image = await handler(req, res);
 
-  if (
-    !title ||
-    !description ||
-    !category ||
-    !employerId ||
-    !deadline ||
-    !address
-  ) {
-    console.log(title, description, category, employerId, deadline, address);
+  if (!title || !description || !category || !deadline || !address) {
+    console.log(title, description, category, deadline, address);
     return res
       .status(400)
       .json(responseBody("failed", "Missing parameters", 400, null));
   }
 
   try {
-    if (parseInt(employerId) !== id) {
-      return res
-        .status(403)
-        .json(
-          responseBody(
-            "forbidden",
-            "Unauthorized: employer is not the logged in user",
-            403,
-            null
-          )
-        );
-    }
     const foundCategory = await prisma.category.findFirst({
       where: { name: category },
     });
@@ -68,7 +48,7 @@ const createTask = async (req, res) => {
         note,
         img: image,
         category: { connect: { id: foundCategory.id } },
-        Employer: { connect: { id: parseInt(employerId) } },
+        Employer: { connect: { id: id } },
       },
     });
 
@@ -76,6 +56,39 @@ const createTask = async (req, res) => {
       .status(201)
       .json(
         responseBody("success", "task created successfully", 201, { newTask })
+      );
+  } catch (error) {
+    console.error("Error creating task:", error);
+    res.status(500).json(responseBody("failed", error.message, 500, null));
+  }
+};
+
+const markTaskAsDone = async (req, res) => {
+  const { id } = req.user;
+  const { taskId } = req.params;
+
+  if (!taskId)
+    return res
+      .status(400)
+      .json(responseBody("failed", "Missing parameters", 400, null));
+
+  try {
+    const task = await prisma.Tasks.update({
+      where: { id: parseInt(taskId), Employer_id: id },
+      data: {
+        status: "Done",
+      },
+    });
+    if (!task) {
+      return res
+        .status(404)
+        .json(responseBody("failed", "Task not found", 404, null));
+    }
+
+    res
+      .status(200)
+      .json(
+        responseBody("success", "task updated successfully", 200, { task })
       );
   } catch (error) {
     console.error("Error creating task:", error);
@@ -121,32 +134,13 @@ const getTaskDetails = async (req, res) => {
 const applyForTask = async (req, res) => {
   const { id } = req.user;
   const { taskId } = req.params;
-  const {
-    employeeId,
-    coverLetter,
-    deadline,
-    similarProject,
-    note,
-    expectedBudget,
-  } = req.body;
+  const { coverLetter, deadline, similarProject, note, expectedBudget } =
+    req.body;
 
-  if (!employeeId || !taskId || !expectedBudget) {
+  if (!taskId || !expectedBudget) {
     return res
       .status(400)
       .json(responseBody("failed", "Missing parameters", 400, null));
-  }
-
-  if (parseInt(employeeId) !== id) {
-    return res
-      .status(403)
-      .json(
-        responseBody(
-          "forbidden",
-          "Unauthorized: employee is not the logged in user",
-          403,
-          null
-        )
-      );
   }
 
   try {
@@ -184,7 +178,7 @@ const applyForTask = async (req, res) => {
     const newApplication = await prisma.application.create({
       data: {
         task: { connect: { id: parseInt(taskId) } },
-        employee: { connect: { id: parseInt(employeeId) } },
+        employee: { connect: { id: id } },
         coverLetter,
         deadline: new Date(deadline),
         similarProject,
@@ -208,25 +202,12 @@ const applyForTask = async (req, res) => {
 
 const acceptApplicant = async (req, res) => {
   const { id } = req.user;
-  const { employerId, applicationId } = req.body;
+  const { applicationId } = req.params;
 
-  if (!employerId || !applicationId) {
+  if (!applicationId) {
     return res
       .status(400)
       .json(responseBody("failed", "Missing parameters", 400, null));
-  }
-
-  if (parseInt(employerId) !== id) {
-    return res
-      .status(403)
-      .json(
-        responseBody(
-          "forbidden",
-          "Unauthorized: employer is not the logged in user",
-          403,
-          null
-        )
-      );
   }
 
   try {
@@ -245,7 +226,7 @@ const acceptApplicant = async (req, res) => {
           responseBody("failed", "No application found with that ID", 404, null)
         );
     }
-    if (application.task.Employer_id !== parseInt(employerId)) {
+    if (application.task.Employer_id !== id) {
       return res
         .status(403)
         .json(
@@ -365,6 +346,7 @@ const listCategories = async (req, res) => {
 
 export {
   createTask,
+  markTaskAsDone,
   getTaskDetails,
   applyForTask,
   acceptApplicant,

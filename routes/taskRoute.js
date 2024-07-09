@@ -2,6 +2,7 @@ import express from "express";
 const router = express.Router();
 import {
   createTask,
+  markTaskAsDone,
   getTaskDetails,
   applyForTask,
   acceptApplicant,
@@ -18,9 +19,10 @@ const upload = multer({ dest: tmpdir() });
 
 router.post("/", upload.single("file"), createTask);
 router.post("/:taskId/apply/", applyForTask);
-router.post("/accept/", acceptApplicant);
 router.get("/:taskId", getTaskDetails);
 router.get("/:taskId/applications", listApplications);
+router.get("/:taskId/markTaskAsDone", markTaskAsDone);
+router.get("/applications/:applicationId/accept/", acceptApplicant);
 router.get("/categories/:parent", listCategories);
 
 export { router as taskRoute };
