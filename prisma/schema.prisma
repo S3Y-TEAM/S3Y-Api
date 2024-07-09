@@ -8,21 +8,22 @@ datasource db {
 }
 
 model Employer {
-  id           Int        @id @unique @default(autoincrement())
-  Fname        String     @db.VarChar(45)
-  Lname        String     @db.VarChar(45)
-  Email        String     @unique @db.VarChar(45)
-  Password     String     @db.VarChar(200)
-  Phone_number String     @db.VarChar(45)
-  img          String
-  country      String     @db.VarChar(45)
-  city         String     @db.VarChar(45)
-  Address      String     @db.VarChar(60)
-  user_name    String     @unique @db.VarChar(45)
-  rating       Int?
-  Tasks        Tasks[]
-  messages     messages[]
-  problems     problems[]
+  id             Int        @id @unique @default(autoincrement())
+  Fname          String     @db.VarChar(45)
+  Lname          String     @db.VarChar(45)
+  Email          String     @unique @db.VarChar(45)
+  Password       String     @db.VarChar(200)
+  Phone_number   String     @db.VarChar(45)
+  country        String     @db.VarChar(45)
+  city           String     @db.VarChar(45)
+  Address        String     @db.VarChar(60)
+  user_name      String     @unique @db.VarChar(45)
+  rating         Int?
+  Personal_image Json?
+  National_image Json?
+  Tasks          Tasks[]
+  messages       messages[]
+  problems       problems[]
 }
 
 model Links {
@@ -127,8 +128,6 @@ model employee {
   Email                 String                @unique @db.VarChar(45)
   Password              String                @db.VarChar(200)
   Phone_number          String                @db.VarChar(45)
-  Personal_image        String                @db.VarChar(200)
-  National_image        String                @db.VarChar(200)
   country               String                @db.VarChar(45)
   city                  String                @db.VarChar(45)
   Address               String                @db.VarChar(255)
@@ -136,6 +135,8 @@ model employee {
   verified              Int
   experience            String                @db.VarChar(45)
   rating                Int?
+  National_image        Json?
+  Personal_image        Json?
   applications          Application[]
   employee_has_category EmployeeHasCategory[]
   Links                 Links[]
