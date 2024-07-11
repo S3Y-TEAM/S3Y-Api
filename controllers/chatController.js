@@ -50,14 +50,14 @@ export const createChat = async (req, res) => {
     }
 
     const chat = await Chat.findOne({
-      members: { $all: [employerId, employeeId] },
+      members: { $all: [parseInt(employerId), parseInt(employeeId)] },
     });
     if (chat)
       return res
         .status(200)
         .json(responseBody("success", "found chat", 200, { chat }));
     const newchat = await Chat.create({
-      members: [employerId, employeeId],
+      members: [parseInt(employerId), parseInt(employeeId)],
     });
     return res.status(201).json(
       responseBody("success", "chat created successfully", 201, {
@@ -88,7 +88,7 @@ export const getUserChats = async (req, res) => {
   }
   try {
     const chats = await Chat.find({
-      members: { $in: [userId] },
+      members: { $in: [parseInt(userId)] },
     });
     return res
       .status(200)
@@ -124,7 +124,7 @@ export const findChat = async (req, res) => {
     }
 
     const chat = await Chat.findOne({
-      members: { $all: [employerId, employeeId] },
+      members: { $all: [parseInt(employerId), parseInt(employeeId)] },
     });
     if (chat)
       return res

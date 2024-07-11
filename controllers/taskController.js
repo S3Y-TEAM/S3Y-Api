@@ -112,6 +112,7 @@ const getTaskDetails = async (req, res) => {
       },
       include: {
         category: true,
+        Employer: true,
         applicants: true,
       },
     });

@@ -69,7 +69,7 @@ async function handler(req, res) {
       return null;
     }
   } else {
-    res.status(405).json({ error: "Method not allowed" });
+    return null;
   }
 }
 
