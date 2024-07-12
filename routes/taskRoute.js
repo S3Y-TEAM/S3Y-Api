@@ -8,6 +8,7 @@ import {
   acceptApplicant,
   listApplications,
   listCategories,
+  getCategoryTasks,
 } from "../controllers/taskController.js";
 import multer from "multer";
 import requireAuth from "../middlewares/requireAuth.js";
@@ -24,5 +25,6 @@ router.get("/:taskId/applications", listApplications);
 router.get("/:taskId/markTaskAsDone", markTaskAsDone);
 router.get("/applications/:applicationId/accept/", acceptApplicant);
 router.get("/categories/:parent", listCategories);
+router.get("/category/:category", getCategoryTasks);
 
 export { router as taskRoute };
